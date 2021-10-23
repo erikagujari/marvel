@@ -16,6 +16,7 @@
 		40FC7DB6272482A4002F2295 /* Service.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FC7DB5272482A4002F2295 /* Service.swift */; };
 		40FC7DB8272482FA002F2295 /* HTTPClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FC7DB7272482FA002F2295 /* HTTPClient.swift */; };
 		40FC7DBA27248334002F2295 /* MarvelError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FC7DB927248334002F2295 /* MarvelError.swift */; };
+		40FC7DC327249BB0002F2295 /* MarvelCharacter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FC7DC227249BB0002F2295 /* MarvelCharacter.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -41,6 +42,7 @@
 		40FC7DB5272482A4002F2295 /* Service.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Service.swift; sourceTree = "<group>"; };
 		40FC7DB7272482FA002F2295 /* HTTPClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HTTPClient.swift; sourceTree = "<group>"; };
 		40FC7DB927248334002F2295 /* MarvelError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarvelError.swift; sourceTree = "<group>"; };
+		40FC7DC227249BB0002F2295 /* MarvelCharacter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarvelCharacter.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -133,6 +135,14 @@
 				40FC7DB927248334002F2295 /* MarvelError.swift */,
 			);
 			path = Network;
+			sourceTree = "<group>";
+		};
+		40FC7DC127249BA7002F2295 /* Entities */ = {
+			isa = PBXGroup;
+			children = (
+				40FC7DC227249BB0002F2295 /* MarvelCharacter.swift */,
+			);
+			path = Entities;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -239,6 +249,7 @@
 				40FC7DB8272482FA002F2295 /* HTTPClient.swift in Sources */,
 				40FC7DB6272482A4002F2295 /* Service.swift in Sources */,
 				40FC7D8227242D87002F2295 /* SceneDelegate.swift in Sources */,
+				40FC7DC327249BB0002F2295 /* MarvelCharacter.swift in Sources */,
 				40FC7DB227242FDA002F2295 /* HomeViewController.swift in Sources */,
 				40FC7DBA27248334002F2295 /* MarvelError.swift in Sources */,
 			);

@@ -9,11 +9,10 @@
 /* Begin PBXBuildFile section */
 		40FC7D8027242D87002F2295 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FC7D7F27242D87002F2295 /* AppDelegate.swift */; };
 		40FC7D8227242D87002F2295 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FC7D8127242D87002F2295 /* SceneDelegate.swift */; };
-		40FC7D8427242D87002F2295 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FC7D8327242D87002F2295 /* ViewController.swift */; };
-		40FC7D8727242D87002F2295 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 40FC7D8527242D87002F2295 /* Main.storyboard */; };
 		40FC7D8927242D89002F2295 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 40FC7D8827242D89002F2295 /* Assets.xcassets */; };
 		40FC7D8C27242D89002F2295 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 40FC7D8A27242D89002F2295 /* LaunchScreen.storyboard */; };
 		40FC7D9727242D89002F2295 /* marvel_heroesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FC7D9627242D89002F2295 /* marvel_heroesTests.swift */; };
+		40FC7DB227242FDA002F2295 /* HomeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FC7DB127242FDA002F2295 /* HomeViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -30,13 +29,12 @@
 		40FC7D7C27242D87002F2295 /* marvel-heroes.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "marvel-heroes.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		40FC7D7F27242D87002F2295 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		40FC7D8127242D87002F2295 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
-		40FC7D8327242D87002F2295 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
-		40FC7D8627242D87002F2295 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		40FC7D8827242D89002F2295 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		40FC7D8B27242D89002F2295 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		40FC7D8D27242D89002F2295 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		40FC7D9227242D89002F2295 /* marvel-heroesTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "marvel-heroesTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		40FC7D9627242D89002F2295 /* marvel_heroesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = marvel_heroesTests.swift; sourceTree = "<group>"; };
+		40FC7DB127242FDA002F2295 /* HomeViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -78,10 +76,9 @@
 		40FC7D7E27242D87002F2295 /* marvel-heroes */ = {
 			isa = PBXGroup;
 			children = (
+				40FC7DAF27242FAF002F2295 /* App */,
 				40FC7D7F27242D87002F2295 /* AppDelegate.swift */,
 				40FC7D8127242D87002F2295 /* SceneDelegate.swift */,
-				40FC7D8327242D87002F2295 /* ViewController.swift */,
-				40FC7D8527242D87002F2295 /* Main.storyboard */,
 				40FC7D8827242D89002F2295 /* Assets.xcassets */,
 				40FC7D8A27242D89002F2295 /* LaunchScreen.storyboard */,
 				40FC7D8D27242D89002F2295 /* Info.plist */,
@@ -95,6 +92,22 @@
 				40FC7D9627242D89002F2295 /* marvel_heroesTests.swift */,
 			);
 			path = "marvel-heroesTests";
+			sourceTree = "<group>";
+		};
+		40FC7DAF27242FAF002F2295 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				40FC7DB027242FCE002F2295 /* Home */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		40FC7DB027242FCE002F2295 /* Home */ = {
+			isa = PBXGroup;
+			children = (
+				40FC7DB127242FDA002F2295 /* HomeViewController.swift */,
+			);
+			path = Home;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -180,7 +193,6 @@
 			files = (
 				40FC7D8C27242D89002F2295 /* LaunchScreen.storyboard in Resources */,
 				40FC7D8927242D89002F2295 /* Assets.xcassets in Resources */,
-				40FC7D8727242D87002F2295 /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -198,9 +210,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				40FC7D8427242D87002F2295 /* ViewController.swift in Sources */,
 				40FC7D8027242D87002F2295 /* AppDelegate.swift in Sources */,
 				40FC7D8227242D87002F2295 /* SceneDelegate.swift in Sources */,
+				40FC7DB227242FDA002F2295 /* HomeViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -223,14 +235,6 @@
 /* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
-		40FC7D8527242D87002F2295 /* Main.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				40FC7D8627242D87002F2295 /* Base */,
-			);
-			name = Main.storyboard;
-			sourceTree = "<group>";
-		};
 		40FC7D8A27242D89002F2295 /* LaunchScreen.storyboard */ = {
 			isa = PBXVariantGroup;
 			children = (
@@ -370,7 +374,6 @@
 				INFOPLIST_FILE = "marvel-heroes/Info.plist";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
-				INFOPLIST_KEY_UIMainStoryboardFile = Main;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -398,7 +401,6 @@
 				INFOPLIST_FILE = "marvel-heroes/Info.plist";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
-				INFOPLIST_KEY_UIMainStoryboardFile = Main;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = (

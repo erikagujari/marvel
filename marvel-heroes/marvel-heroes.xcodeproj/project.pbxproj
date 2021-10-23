@@ -14,19 +14,10 @@
 		40FC7D8927242D89002F2295 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 40FC7D8827242D89002F2295 /* Assets.xcassets */; };
 		40FC7D8C27242D89002F2295 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 40FC7D8A27242D89002F2295 /* LaunchScreen.storyboard */; };
 		40FC7D9727242D89002F2295 /* marvel_heroesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FC7D9627242D89002F2295 /* marvel_heroesTests.swift */; };
-		40FC7DA127242D89002F2295 /* marvel_heroesUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FC7DA027242D89002F2295 /* marvel_heroesUITests.swift */; };
-		40FC7DA327242D89002F2295 /* marvel_heroesUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FC7DA227242D89002F2295 /* marvel_heroesUITestsLaunchTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
 		40FC7D9327242D89002F2295 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 40FC7D7427242D87002F2295 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 40FC7D7B27242D87002F2295;
-			remoteInfo = "marvel-heroes";
-		};
-		40FC7D9D27242D89002F2295 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 40FC7D7427242D87002F2295 /* Project object */;
 			proxyType = 1;
@@ -46,9 +37,6 @@
 		40FC7D8D27242D89002F2295 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		40FC7D9227242D89002F2295 /* marvel-heroesTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "marvel-heroesTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		40FC7D9627242D89002F2295 /* marvel_heroesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = marvel_heroesTests.swift; sourceTree = "<group>"; };
-		40FC7D9C27242D89002F2295 /* marvel-heroesUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "marvel-heroesUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
-		40FC7DA027242D89002F2295 /* marvel_heroesUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = marvel_heroesUITests.swift; sourceTree = "<group>"; };
-		40FC7DA227242D89002F2295 /* marvel_heroesUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = marvel_heroesUITestsLaunchTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -66,13 +54,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		40FC7D9927242D89002F2295 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -81,7 +62,6 @@
 			children = (
 				40FC7D7E27242D87002F2295 /* marvel-heroes */,
 				40FC7D9527242D89002F2295 /* marvel-heroesTests */,
-				40FC7D9F27242D89002F2295 /* marvel-heroesUITests */,
 				40FC7D7D27242D87002F2295 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -91,7 +71,6 @@
 			children = (
 				40FC7D7C27242D87002F2295 /* marvel-heroes.app */,
 				40FC7D9227242D89002F2295 /* marvel-heroesTests.xctest */,
-				40FC7D9C27242D89002F2295 /* marvel-heroesUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -116,15 +95,6 @@
 				40FC7D9627242D89002F2295 /* marvel_heroesTests.swift */,
 			);
 			path = "marvel-heroesTests";
-			sourceTree = "<group>";
-		};
-		40FC7D9F27242D89002F2295 /* marvel-heroesUITests */ = {
-			isa = PBXGroup;
-			children = (
-				40FC7DA027242D89002F2295 /* marvel_heroesUITests.swift */,
-				40FC7DA227242D89002F2295 /* marvel_heroesUITestsLaunchTests.swift */,
-			);
-			path = "marvel-heroesUITests";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -165,24 +135,6 @@
 			productReference = 40FC7D9227242D89002F2295 /* marvel-heroesTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		40FC7D9B27242D89002F2295 /* marvel-heroesUITests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 40FC7DAC27242D89002F2295 /* Build configuration list for PBXNativeTarget "marvel-heroesUITests" */;
-			buildPhases = (
-				40FC7D9827242D89002F2295 /* Sources */,
-				40FC7D9927242D89002F2295 /* Frameworks */,
-				40FC7D9A27242D89002F2295 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				40FC7D9E27242D89002F2295 /* PBXTargetDependency */,
-			);
-			name = "marvel-heroesUITests";
-			productName = "marvel-heroesUITests";
-			productReference = 40FC7D9C27242D89002F2295 /* marvel-heroesUITests.xctest */;
-			productType = "com.apple.product-type.bundle.ui-testing";
-		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -197,10 +149,6 @@
 						CreatedOnToolsVersion = 13.0;
 					};
 					40FC7D9127242D89002F2295 = {
-						CreatedOnToolsVersion = 13.0;
-						TestTargetID = 40FC7D7B27242D87002F2295;
-					};
-					40FC7D9B27242D89002F2295 = {
 						CreatedOnToolsVersion = 13.0;
 						TestTargetID = 40FC7D7B27242D87002F2295;
 					};
@@ -221,7 +169,6 @@
 			targets = (
 				40FC7D7B27242D87002F2295 /* marvel-heroes */,
 				40FC7D9127242D89002F2295 /* marvel-heroesTests */,
-				40FC7D9B27242D89002F2295 /* marvel-heroesUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -238,13 +185,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		40FC7D9027242D89002F2295 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		40FC7D9A27242D89002F2295 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -272,15 +212,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		40FC7D9827242D89002F2295 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				40FC7DA127242D89002F2295 /* marvel_heroesUITests.swift in Sources */,
-				40FC7DA327242D89002F2295 /* marvel_heroesUITestsLaunchTests.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -288,11 +219,6 @@
 			isa = PBXTargetDependency;
 			target = 40FC7D7B27242D87002F2295 /* marvel-heroes */;
 			targetProxy = 40FC7D9327242D89002F2295 /* PBXContainerItemProxy */;
-		};
-		40FC7D9E27242D89002F2295 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 40FC7D7B27242D87002F2295 /* marvel-heroes */;
-			targetProxy = 40FC7D9D27242D89002F2295 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -538,52 +464,6 @@
 			};
 			name = Release;
 		};
-		40FC7DAD27242D89002F2295 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 69Q3WZF8JC;
-				GENERATE_INFOPLIST_FILE = YES;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.erikagujari.marvel-heroesUITests";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = "marvel-heroes";
-			};
-			name = Debug;
-		};
-		40FC7DAE27242D89002F2295 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 69Q3WZF8JC;
-				GENERATE_INFOPLIST_FILE = YES;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.erikagujari.marvel-heroesUITests";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = "marvel-heroes";
-			};
-			name = Release;
-		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -610,15 +490,6 @@
 			buildConfigurations = (
 				40FC7DAA27242D89002F2295 /* Debug */,
 				40FC7DAB27242D89002F2295 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		40FC7DAC27242D89002F2295 /* Build configuration list for PBXNativeTarget "marvel-heroesUITests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				40FC7DAD27242D89002F2295 /* Debug */,
-				40FC7DAE27242D89002F2295 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

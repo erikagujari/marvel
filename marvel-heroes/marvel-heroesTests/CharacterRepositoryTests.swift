@@ -108,7 +108,7 @@ private extension CharacterRepositoryTests {
         let exp = expectation(description: "Waiting to complete fetch")
         var cancellables = Set<AnyCancellable>()
         
-        sut.fetch(limit: 0, offset: 0)
+        sut.fetch(limit: 0, offset: 0, apiKey: "")
             .sink { receivedResult in
                 XCTAssertEqual(expectedResult, receivedResult, file: file, line: line)
                 exp.fulfill()

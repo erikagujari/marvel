@@ -7,7 +7,7 @@
 import Foundation
 
 enum CharacterService: Service {
-    case list(limit: Int, offset: Int)
+    case list(limit: Int, offset: Int, apiKey: String)
     
     var baseURL: String {
         return "https://gateway.marvel.com:443/"
@@ -21,11 +21,11 @@ enum CharacterService: Service {
     
     var parameters: [String : Any]? {
         switch self {
-        case let .list(limit, offset):
+        case let .list(limit, offset, apiKey):
             var dictionary = [String: Any]()
             dictionary["limit"] = limit
             dictionary["offset"] = offset
-            dictionary["apikey"] = Bundle.main.object(forInfoDictionaryKey: "API_KEY") as? String ?? ""
+            dictionary["apikey"] = apiKey
             
             return dictionary
         }

@@ -8,4 +8,5 @@
 enum MarvelError: Error {
     case serviceError
     case mappingError
+    case apiKeyError
 }

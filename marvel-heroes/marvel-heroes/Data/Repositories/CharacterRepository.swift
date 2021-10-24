@@ -7,7 +7,7 @@
 import Combine
 
 protocol CharacterRepository {
-    func fetch(limit: Int, offset: Int) -> AnyPublisher<[MarvelCharacter], MarvelError>
+    func fetch(limit: Int, offset: Int, apiKey: String) -> AnyPublisher<[MarvelCharacter], MarvelError>
 }
 
 struct CharacterRepositoryProvider: CharacterRepository {
@@ -17,8 +17,8 @@ struct CharacterRepositoryProvider: CharacterRepository {
         self.httpClient = httpClient
     }
     
-    func fetch(limit: Int, offset: Int) -> AnyPublisher<[MarvelCharacter], MarvelError> {
-        return httpClient.fetch(CharacterService.list(limit: limit, offset: offset), responseType: CharactersResponse.self)
+    func fetch(limit: Int, offset: Int, apiKey: String) -> AnyPublisher<[MarvelCharacter], MarvelError> {
+        return httpClient.fetch(CharacterService.list(limit: limit, offset: offset, apiKey: apiKey), responseType: CharactersResponse.self)
             .map { response in
                 return response.data.results
             }.eraseToAnyPublisher()

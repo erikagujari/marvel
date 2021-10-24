@@ -5,6 +5,14 @@
 //  Created by Erik Agujari on 23/10/21.
 //
 
+struct CharactersResponse: Decodable {
+    let data: CharactersResponseData
+}
+
+struct CharactersResponseData: Decodable {
+    let results: [MarvelCharacter]
+}
+
 struct MarvelCharacter: Decodable {
     let id: Int?
     let name: String?

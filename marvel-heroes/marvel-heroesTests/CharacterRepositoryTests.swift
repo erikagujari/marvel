@@ -11,22 +11,85 @@ import XCTest
 final class CharacterRepositoryTests: XCTestCase {
     func test_fetchReturnsServiceError_onNilHTTPResponse() {
         let sut = makeSUT(data: nil, urlResponse: nil, error: nil)
-        let exp = expectation(description: "Waiting to complete fetch")
-        var cancellables = Set<AnyCancellable>()
         
-        let _ = sut.fetch(limit: 0, offset: 0)
-            .sink { result in
-                switch result {
-                case let .failure(error):
-                    XCTAssertEqual(error as? MarvelError, .serviceError)
-                case .finished:
-                    XCTFail("It should not succed on nil http response")
-                }
-                exp.fulfill()
-            } receiveValue: { _ in }
-            .store(in: &cancellables)
+        expect(sut: sut, endsWithResult: .failure(.serviceError))
+    }
+    
+    func test_fetchReturnsServiceError_onNotHTTPURLResponse() {
+        let sut = makeSUT(data: nil, urlResponse: URLResponse(), error: nil)
         
-        wait(for: [exp], timeout: 0.1)
+        expect(sut: sut, endsWithResult: .failure(.serviceError))
+    }
+    
+    func test_fetchReturnsServiceError_on199StatusCode() {
+        let urlResponse = HTTPURLResponse(url: URL(string: "https://any-url.com")!,
+                                          statusCode: 199,
+                                          httpVersion: nil,
+                                          headerFields: nil)
+        let sut = makeSUT(data: nil, urlResponse: urlResponse, error: nil)
+        
+        expect(sut: sut, endsWithResult: .failure(.serviceError))
+    }
+    
+    func test_fetchReturnsServiceError_on300StatusCode() {
+        let urlResponse = HTTPURLResponse(url: URL(string: "https://any-url.com")!,
+                                          statusCode: 300,
+                                          httpVersion: nil,
+                                          headerFields: nil)
+        let sut = makeSUT(data: nil, urlResponse: urlResponse, error: nil)
+        
+        expect(sut: sut, endsWithResult: .failure(.serviceError))
+    }
+    
+    func test_fetchReturnsMappingError_onNilData() {
+        let urlResponse = HTTPURLResponse(url: URL(string: "https://any-url.com")!,
+                                          statusCode: 200,
+                                          httpVersion: nil,
+                                          headerFields: nil)
+        let sut = makeSUT(data: nil, urlResponse: urlResponse, error: nil)
+        
+        expect(sut: sut, endsWithResult: .failure(.mappingError))
+    }
+    
+    func test_fetchReturnsMappingError_onEmptyData() {
+        let data = "".data(using: .utf8)
+        let urlResponse = HTTPURLResponse(url: URL(string: "https://any-url.com")!,
+                                          statusCode: 200,
+                                          httpVersion: nil,
+                                          headerFields: nil)
+        let sut = makeSUT(data: data, urlResponse: urlResponse, error: nil)
+        
+        expect(sut: sut, endsWithResult: .failure(.mappingError))
+    }
+    
+    func test_fetchReturnsMappingError_onInvalidData() {
+        let urlResponse = HTTPURLResponse(url: URL(string: "https://any-url.com")!,
+                                          statusCode: 200,
+                                          httpVersion: nil,
+                                          headerFields: nil)
+        let sut = makeSUT(data: anyInvalidJSON(), urlResponse: urlResponse, error: nil)
+        
+        expect(sut: sut, endsWithResult: .failure(.mappingError))
+    }
+    
+    func test_fetchReturnsCharacters_onValidData() {
+        let urlResponse = HTTPURLResponse(url: URL(string: "https://any-url.com")!,
+                                          statusCode: 200,
+                                          httpVersion: nil,
+                                          headerFields: nil)
+        let sut = makeSUT(data: anyValidJSON(), urlResponse: urlResponse, error: nil)
+        
+        expect(sut: sut, endsWithResult: .finished)
+    }
+    
+    func test_fetchReturnsServiceError_onAnyError() {
+        let urlResponse = HTTPURLResponse(url: URL(string: "https://any-url.com")!,
+                                          statusCode: 200,
+                                          httpVersion: nil,
+                                          headerFields: nil)
+        let sut = makeSUT(data: anyValidJSON(), urlResponse: urlResponse, error: MarvelError.mappingError)
+        
+        expect(sut: sut, endsWithResult: .failure(.serviceError))
     }
 }
 
@@ -41,11 +104,27 @@ private extension CharacterRepositoryTests {
         return CharacterRepositoryProvider(httpClient: URLSessionHTTPClient(session: URLSession(configuration: configuration)))
     }
     
+    func expect(sut: CharacterRepository, endsWithResult expectedResult: Subscribers.Completion<MarvelError>, file: StaticString = #filePath, line: UInt = #line) {
+        let exp = expectation(description: "Waiting to complete fetch")
+        var cancellables = Set<AnyCancellable>()
+        
+        let _ = sut.fetch(limit: 0, offset: 0)
+            .sink { receivedResult in
+                XCTAssertEqual(expectedResult, receivedResult, file: file, line: line)
+                exp.fulfill()
+            } receiveValue: { characters in
+                XCTAssertFalse(characters.isEmpty)
+            }
+            .store(in: &cancellables)
+        
+        wait(for: [exp], timeout: 0.1)
+    }
+    
     class URLProtocolStub: URLProtocol {
         static var urlResponse: URLResponse?
         static var data: Data?
         static var error: Error?
-                
+        
         override class func canInit(with request: URLRequest) -> Bool {
             return true
         }
@@ -70,5 +149,5 @@ private extension CharacterRepositoryTests {
         }
         
         override func stopLoading() {}
-    }
+    }    
 }

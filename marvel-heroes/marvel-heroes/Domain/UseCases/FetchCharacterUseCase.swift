@@ -21,11 +21,18 @@ struct FetchCharacterUseCaseProvider: FetchCharacterUseCase {
     }
     
     func execute(limit: Int, offset: Int) -> AnyPublisher<[MarvelCharacter], MarvelError> {
-        guard let apiKey = bundle.object(forInfoDictionaryKey: "API_KEY") as? String else {
+        guard let publicKey = bundle.object(forInfoDictionaryKey: "API_PUBLIC_KEY") as? String,
+              let privateKey = bundle.object(forInfoDictionaryKey: "API_PRIVATE_KEY") as? String else {
             return Fail<[MarvelCharacter], MarvelError>(error: MarvelError.apiKeyError).eraseToAnyPublisher()
         }
                 
-        return repository.fetch(limit: limit, offset: offset, apiKey: apiKey)
+        let timestamp = String(Date().timeIntervalSince1970)
+        let parameters = CharacterService.ListParameters(limit: limit,
+                                                         offset: offset,
+                                                         apiKey: publicKey,
+                                                         timestamp: timestamp,
+                                                         hash: "\(timestamp)\(privateKey)\(publicKey)".toMD5String())
+        return repository.fetch(parameters: parameters)
             .flatMap { characters -> AnyPublisher<[MarvelCharacter], MarvelError> in
                 guard characters.isEmpty else {
                     return Just<[MarvelCharacter]>(characters).setFailureType(to: MarvelError.self).eraseToAnyPublisher()

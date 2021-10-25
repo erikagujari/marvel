@@ -7,10 +7,17 @@
 import Foundation
 
 enum CharacterService: Service {
-    case list(limit: Int, offset: Int, apiKey: String)
+    struct ListParameters {
+        let limit: Int
+        let offset: Int
+        let apiKey: String
+        let timestamp: String
+        let hash: String
+    }
+    case list(parameters: ListParameters)
     
     var baseURL: String {
-        return "https://gateway.marvel.com:443/"
+        return "https://gateway.marvel.com:443"
     }
     var path: String {
         switch self {
@@ -21,11 +28,13 @@ enum CharacterService: Service {
     
     var parameters: [String : Any]? {
         switch self {
-        case let .list(limit, offset, apiKey):
+        case let .list(parameters):
             var dictionary = [String: Any]()
-            dictionary["limit"] = limit
-            dictionary["offset"] = offset
-            dictionary["apikey"] = apiKey
+            dictionary["limit"] = String(parameters.limit)
+            dictionary["offset"] = String(parameters.offset)
+            dictionary["apikey"] = parameters.apiKey
+            dictionary["ts"] = parameters.timestamp
+            dictionary["hash"] = parameters.hash
             
             return dictionary
         }

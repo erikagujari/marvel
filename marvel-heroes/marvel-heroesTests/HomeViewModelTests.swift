@@ -47,6 +47,6 @@ private extension HomeViewModelTests {
 
 extension MarvelCharacterModel: Equatable {
     public static func == (lhs: MarvelCharacterModel, rhs: MarvelCharacterModel) -> Bool {
-        return true
+        return lhs.id == rhs.id
     }
 }

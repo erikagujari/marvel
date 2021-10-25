@@ -7,7 +7,7 @@
 import Combine
 
 protocol HomeViewModel {
-    var characters: CurrentValueSubject<[MarvelCharacterModel], MarvelError> { get set }
+    var characters: CurrentValueSubject<[MarvelCharacterModel], Never> { get set }
     func fetchInitialCharacters()
 }
 
@@ -15,7 +15,7 @@ final class HomeViewModelProvider: HomeViewModel {
     private let fetchCharactersUseCase: FetchCharacterUseCase
     private let limitRequest: Int
     private var cancellables = Set<AnyCancellable>()
-    var characters = CurrentValueSubject<[MarvelCharacterModel], MarvelError>([MarvelCharacterModel]())
+    var characters = CurrentValueSubject<[MarvelCharacterModel], Never>([MarvelCharacterModel]())
     
     init(fetchCharactersUseCase: FetchCharacterUseCase, limitRequest: Int) {
         self.fetchCharactersUseCase = fetchCharactersUseCase
@@ -27,7 +27,7 @@ final class HomeViewModelProvider: HomeViewModel {
             .sink { result in
                 print(result)
             } receiveValue: { [weak self] characters in
-                let models = characters.map { MarvelCharacterModel(from: $0) }
+                let models = characters.compactMap { MarvelCharacterModel(from: $0) }
                 self?.characters.send(models)
             }
             .store(in: &cancellables)

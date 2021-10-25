@@ -23,7 +23,7 @@ final class FetchCharacterUseCaseTests: XCTestCase {
     }
     
     func test_execeuteFails_onEmptyBundleDictionary() {
-        let characters = [MarvelCharacter(id: 0, name: "", description: "", modified: "", thumbnail: Thumbnail(path: "", fileExtension: ""))]
+        let characters = anyMarvelCharacterList()
         let sut = makeSUT(result: Just<[MarvelCharacter]>(characters).setFailureType(to: MarvelError.self).eraseToAnyPublisher(),
                           dictionary: [:])
         
@@ -31,7 +31,7 @@ final class FetchCharacterUseCaseTests: XCTestCase {
     }
     
     func test_executeFails_onBundleDictionaryWithoutKey() {
-        let characters = [MarvelCharacter(id: 0, name: "", description: "", modified: "", thumbnail: Thumbnail(path: "", fileExtension: ""))]
+        let characters = anyMarvelCharacterList()
         let sut = makeSUT(result: Just<[MarvelCharacter]>(characters).setFailureType(to: MarvelError.self).eraseToAnyPublisher(),
                           dictionary: ["NOT_API_KEY": "any value"])
         
@@ -39,7 +39,7 @@ final class FetchCharacterUseCaseTests: XCTestCase {
     }
     
     func test_executeFails_onBundleDictionaryWithoutApiPublicKeyStringType() {
-        let characters = [MarvelCharacter(id: 0, name: "", description: "", modified: "", thumbnail: Thumbnail(path: "", fileExtension: ""))]
+        let characters = anyMarvelCharacterList()
         let sut = makeSUT(result: Just<[MarvelCharacter]>(characters).setFailureType(to: MarvelError.self).eraseToAnyPublisher(),
                           dictionary: ["API_PUBLIC_KEY": 1])
         
@@ -47,7 +47,7 @@ final class FetchCharacterUseCaseTests: XCTestCase {
     }
     
     func test_executeFails_onBundleDictionaryWithoutApiPrivateKeyStringType() {
-        let characters = [MarvelCharacter(id: 0, name: "", description: "", modified: "", thumbnail: Thumbnail(path: "", fileExtension: ""))]
+        let characters = anyMarvelCharacterList()
         let sut = makeSUT(result: Just<[MarvelCharacter]>(characters).setFailureType(to: MarvelError.self).eraseToAnyPublisher(),
                           dictionary: ["API_PUBLIC_KEY": "1",
                                        "API_PRIVATE_KEY": 1])
@@ -56,7 +56,7 @@ final class FetchCharacterUseCaseTests: XCTestCase {
     }
     
     func test_executeFinishes_onRepositoryNotEmptyList_andValidBundleDictionary() {
-        let characters = [MarvelCharacter(id: 0, name: "", description: "", modified: "", thumbnail: Thumbnail(path: "", fileExtension: ""))]
+        let characters = anyMarvelCharacterList()
         let sut = makeSUT(result: Just<[MarvelCharacter]>(characters).setFailureType(to: MarvelError.self).eraseToAnyPublisher(),
                           dictionary: ["API_PUBLIC_KEY": "1",
                                        "API_PRIVATE_KEY": "1"])

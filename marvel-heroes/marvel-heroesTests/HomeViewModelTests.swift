@@ -45,36 +45,8 @@ private extension HomeViewModelTests {
     }
 }
 
-protocol HomeViewModel {
-    var characters: CurrentValueSubject<[MarvelCharacterModel], MarvelError> { get set }
-    func fetchInitialCharacters()
-}
-
-struct MarvelCharacterModel: Equatable {
-    init(from character: MarvelCharacter) {
-        
-    }
-}
-
-final class HomeViewModelProvider: HomeViewModel {
-    private let fetchCharactersUseCase: FetchCharacterUseCase
-    private let limitRequest: Int
-    private var cancellables = Set<AnyCancellable>()
-    var characters = CurrentValueSubject<[MarvelCharacterModel], MarvelError>([MarvelCharacterModel]())
-    
-    init(fetchCharactersUseCase: FetchCharacterUseCase, limitRequest: Int) {
-        self.fetchCharactersUseCase = fetchCharactersUseCase
-        self.limitRequest = limitRequest
-    }
-    
-    func fetchInitialCharacters() {
-        fetchCharactersUseCase.execute(limit: limitRequest, offset: 0)
-            .sink { result in
-                print(result)
-            } receiveValue: { [weak self] characters in
-                let models = characters.map { MarvelCharacterModel(from: $0) }
-                self?.characters.send(models)
-            }
-            .store(in: &cancellables)
+extension MarvelCharacterModel: Equatable {
+    public static func == (lhs: MarvelCharacterModel, rhs: MarvelCharacterModel) -> Bool {
+        return true
     }
 }

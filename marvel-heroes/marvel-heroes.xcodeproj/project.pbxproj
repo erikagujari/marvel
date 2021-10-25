@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4017543F2726E6CD00465F5E /* String+MD5.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4017543E2726E6CD00465F5E /* String+MD5.swift */; };
 		4060CCAF272550EB00323E50 /* CharacterRepositoryTests+JSONMock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4060CCAE272550EB00323E50 /* CharacterRepositoryTests+JSONMock.swift */; };
 		4060CCB12725556A00323E50 /* FetchCharactersUseCaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4060CCB02725556A00323E50 /* FetchCharactersUseCaseTests.swift */; };
 		4060CCB527255A7D00323E50 /* FetchCharacterUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4060CCB427255A7D00323E50 /* FetchCharacterUseCase.swift */; };
@@ -35,6 +36,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		4017543E2726E6CD00465F5E /* String+MD5.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+MD5.swift"; sourceTree = "<group>"; };
 		4060CCAE272550EB00323E50 /* CharacterRepositoryTests+JSONMock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CharacterRepositoryTests+JSONMock.swift"; sourceTree = "<group>"; };
 		4060CCB02725556A00323E50 /* FetchCharactersUseCaseTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FetchCharactersUseCaseTests.swift; sourceTree = "<group>"; };
 		4060CCB427255A7D00323E50 /* FetchCharacterUseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FetchCharacterUseCase.swift; sourceTree = "<group>"; };
@@ -74,9 +76,18 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		4017543D2726E6B000465F5E /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				4017543E2726E6CD00465F5E /* String+MD5.swift */,
+			);
+			path = Extensions;
+			sourceTree = "<group>";
+		};
 		4060CCB227255A5200323E50 /* Domain */ = {
 			isa = PBXGroup;
 			children = (
+				4017543D2726E6B000465F5E /* Extensions */,
 				4060CCB327255A5700323E50 /* UseCases */,
 			);
 			path = Domain;
@@ -297,6 +308,7 @@
 			files = (
 				40FC7D8027242D87002F2295 /* AppDelegate.swift in Sources */,
 				40FC7DB8272482FA002F2295 /* HTTPClient.swift in Sources */,
+				4017543F2726E6CD00465F5E /* String+MD5.swift in Sources */,
 				40FC7DB6272482A4002F2295 /* Service.swift in Sources */,
 				40FC7D8227242D87002F2295 /* SceneDelegate.swift in Sources */,
 				4060CCB527255A7D00323E50 /* FetchCharacterUseCase.swift in Sources */,

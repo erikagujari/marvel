@@ -11,7 +11,7 @@ final class HomeUIComposer {
     private init() {}
     
     static func compose(fetchUseCase: FetchCharacterUseCase, limitRequest: Int) -> UIViewController {
-        let viewModel = HomeViewModelProvider(fetchCharactersUseCase: fetchUseCase, limitRequest: limitRequest)
+        let viewModel = HomeViewModelProvider(fetchCharactersUseCase: fetchUseCase, limitRequest: limitRequest, imageLoader: ImageLoaderProvider(session: .shared))
         return UINavigationController(rootViewController: HomeViewController(viewModel: viewModel))
     }
 }

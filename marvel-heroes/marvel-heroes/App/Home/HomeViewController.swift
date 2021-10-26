@@ -39,7 +39,10 @@ final class HomeViewController: UITableViewController {
     private func setupTableView() {
         tableView.register(HomeCell.self, forCellReuseIdentifier: HomeCell.description())
     }
-    
+}
+
+//MARK: - UITableViewDataSource
+extension HomeViewController {
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return viewModel.characters.value.count
     }
@@ -54,6 +57,7 @@ final class HomeViewController: UITableViewController {
         }
         
         cell.configure(model: viewModel.characters.value[indexPath.row])
+        viewModel.loadImage(for: indexPath.row, cell: cell)
         
         return cell
     }

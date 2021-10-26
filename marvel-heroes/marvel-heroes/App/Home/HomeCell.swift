@@ -10,7 +10,7 @@ import UIKit
 final class HomeCell: UITableViewCell {
     private lazy var mainImageView: UIImageView = {
         let imageView = UIImageView()
-        
+                
         NSLayoutConstraint.activate([imageView.widthAnchor.constraint(equalToConstant: 60),
                                      imageView.heightAnchor.constraint(equalTo: imageView.widthAnchor)])
         
@@ -54,6 +54,12 @@ final class HomeCell: UITableViewCell {
         return stackView
     }()
     
+    var cancelAction: (() -> Void)?
+    
+    override func prepareForReuse() {
+        cancelAction?()
+    }
+    
     func configure(model: MarvelCharacterModel) {
         titleLabel.text = model.name
         if let modelDescription = model.description, !modelDescription.isEmpty {
@@ -66,5 +72,7 @@ final class HomeCell: UITableViewCell {
     
     func update(image: UIImage) {
         mainImageView.image = image
+        mainImageView.layer.cornerRadius = mainImageView.frame.width / 2
+        mainImageView.clipsToBounds = true
     }
 }

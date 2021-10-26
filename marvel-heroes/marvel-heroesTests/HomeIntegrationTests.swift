@@ -31,6 +31,8 @@ private extension HomeIntegrationTests {
     func makeSUT(initialResult: AnyPublisher<[MarvelCharacter], MarvelError>) -> (HomeViewController) {
         let viewModel = HomeViewModelProvider(fetchCharactersUseCase: FetchCharacterUseCaseStub(result: initialResult), limitRequest: 10)
         let viewController = HomeViewController(viewModel: viewModel)
+        trackForMemoryLeaks(instance: viewModel)
+        trackForMemoryLeaks(instance: viewController)
         
         return viewController
     }

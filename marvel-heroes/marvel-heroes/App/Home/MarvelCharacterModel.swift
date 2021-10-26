@@ -21,7 +21,7 @@ struct MarvelCharacterModel {
         self.description = character.description
         if let path = character.thumbnail.path,
            let fileExtension = character.thumbnail.fileExtension {
-            imagePath = "\(path)\(fileExtension)"
+            imagePath = "\(path).\(fileExtension)"
         } else {
             imagePath = nil
         }

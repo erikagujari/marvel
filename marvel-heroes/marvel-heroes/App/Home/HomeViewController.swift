@@ -41,6 +41,13 @@ final class HomeViewController: UITableViewController {
                 show ? self?.view.showSpinner() : self?.view.dismissSpinner()
             })
             .store(in: &cancellables)
+        
+        viewModel.title
+            .receive(on: DispatchQueue.main)
+            .sink(receiveValue: { [weak self] title in
+                self?.title = title
+            })
+            .store(in: &cancellables)
     }
     
     private func setupTableView() {

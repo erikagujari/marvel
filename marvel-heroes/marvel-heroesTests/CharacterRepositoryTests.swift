@@ -117,7 +117,7 @@ private extension CharacterRepositoryTests {
             }
             .store(in: &cancellables)
         
-        wait(for: [exp], timeout: 1.0)
+        wait(for: [exp], timeout: 2)
     }
     
     class URLProtocolStub: URLProtocol {

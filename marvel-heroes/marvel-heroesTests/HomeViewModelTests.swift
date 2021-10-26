@@ -33,7 +33,8 @@ final class HomeViewModelTests: XCTestCase {
 private extension HomeViewModelTests {
     func makeSUT(fetchUseCaseResult: AnyPublisher<[MarvelCharacter], MarvelError>) -> HomeViewModel {
         return HomeViewModelProvider(fetchCharactersUseCase: FetchCharacterUseCaseStub(result: fetchUseCaseResult),
-                                     limitRequest: 20)
+                                     limitRequest: 20,
+                                     imageLoader: ImageLoaderUseCaseStub())
     }
 }
 

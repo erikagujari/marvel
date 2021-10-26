@@ -5,6 +5,7 @@
 //  Created by Erik Agujari on 25/10/21.
 //
 import Combine
+import UIKit
 @testable import marvel_heroes
 
 func anyMarvelCharacterList() -> [MarvelCharacter] {
@@ -12,9 +13,27 @@ func anyMarvelCharacterList() -> [MarvelCharacter] {
 }
 
 struct FetchCharacterUseCaseStub: FetchCharacterUseCase {
-    let result: AnyPublisher<[MarvelCharacter], MarvelError>
+    private let result: AnyPublisher<[MarvelCharacter], MarvelError>
+    private let delay: Double?
+    
+    init(result: AnyPublisher<[MarvelCharacter], MarvelError>, delay: Double? = nil) {
+        self.result = result
+        self.delay = delay
+    }
     
     func execute(limit: Int, offset: Int) -> AnyPublisher<[MarvelCharacter], MarvelError> {
-        return result
+        guard let delay = delay else {
+            return result
+        }
+
+        return result.delay(for: RunLoop.SchedulerTimeType.Stride(delay), scheduler: RunLoop.main).eraseToAnyPublisher()
     }
+}
+
+struct ImageLoaderUseCaseStub: ImageLoaderUseCase {
+    func fetch(from path: String, completion: @escaping (Result<UIImage, Error>) -> Void) {
+        completion(.success(UIImage()))
+    }
+    
+    func cancel() { }
 }

@@ -9,6 +9,7 @@ import UIKit
 
 protocol HomeViewModel {
     var characters: CurrentValueSubject<[MarvelCharacterModel], Never> { get set }
+    var showSpinner: PassthroughSubject<Bool, Never> { get set }
     func fetchInitialCharacters()
     func cellModel(for index: Int, imageAction: @escaping (UIImage) -> Void) -> HomeCellModel
 }
@@ -19,6 +20,7 @@ final class HomeViewModelProvider: HomeViewModel {
     private let imageLoader: ImageLoaderUseCase
     private var cancellables = Set<AnyCancellable>()
     var characters = CurrentValueSubject<[MarvelCharacterModel], Never>([MarvelCharacterModel]())
+    var showSpinner = PassthroughSubject<Bool, Never>()
     
     init(fetchCharactersUseCase: FetchCharacterUseCase, limitRequest: Int, imageLoader: ImageLoaderUseCase) {
         self.fetchCharactersUseCase = fetchCharactersUseCase
@@ -27,9 +29,10 @@ final class HomeViewModelProvider: HomeViewModel {
     }
     
     func fetchInitialCharacters() {
+        showSpinner.send(true)
         fetchCharactersUseCase.execute(limit: limitRequest, offset: 0)
-            .sink { result in
-                print(result)
+            .sink { [weak self] result in
+                self?.showSpinner.send(false)
             } receiveValue: { [weak self] characters in
                 let models = characters.compactMap { MarvelCharacterModel(from: $0) }
                 self?.characters.send(models)

@@ -34,6 +34,13 @@ final class HomeViewController: UITableViewController {
             .sink { [weak self] _ in
                 self?.tableView.reloadData()
         }.store(in: &cancellables)
+        
+        viewModel.showSpinner
+            .receive(on: DispatchQueue.main)
+            .sink(receiveValue: { [weak self] show in
+                show ? self?.view.showSpinner() : self?.view.dismissSpinner()
+            })
+            .store(in: &cancellables)
     }
     
     private func setupTableView() {

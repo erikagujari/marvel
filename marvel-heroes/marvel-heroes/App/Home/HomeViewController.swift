@@ -56,8 +56,8 @@ extension HomeViewController {
             return UITableViewCell()
         }
         
-        cell.configure(model: viewModel.characters.value[indexPath.row])
-        viewModel.loadImage(for: indexPath.row, cell: cell)
+        let model = viewModel.cellModel(for: indexPath.row, imageAction: cell.update)
+        cell.configure(model: model)
         
         return cell
     }

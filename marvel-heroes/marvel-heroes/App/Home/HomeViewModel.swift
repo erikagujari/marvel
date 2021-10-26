@@ -10,7 +10,7 @@ import UIKit
 protocol HomeViewModel {
     var characters: CurrentValueSubject<[MarvelCharacterModel], Never> { get set }
     func fetchInitialCharacters()
-    func loadImage(for row: Int, cell: HomeCell)
+    func cellModel(for index: Int, imageAction: @escaping (UIImage) -> Void) -> HomeCellModel
 }
 
 final class HomeViewModelProvider: HomeViewModel {
@@ -37,17 +37,19 @@ final class HomeViewModelProvider: HomeViewModel {
             .store(in: &cancellables)
     }
     
-    func loadImage(for row: Int, cell: HomeCell) {
-        guard let path = characters.value[row].imagePath else { return }
+    func cellModel(for index: Int, imageAction: @escaping (UIImage) -> Void) -> HomeCellModel {
+        let model = characters.value[index]
+        guard let path = model.imagePath else {
+            return HomeCellModel(title: model.name, description: model.description, cancelAction: nil)
+        }
         
-        cell.cancelAction = imageLoader.cancel
         imageLoader.fetch(from: path) { result in
             guard let image = try? result.get() else { return }
             
             DispatchQueue.main.async {
-                cell.update(image: image)
+                imageAction(image)
             }
         }
+        return HomeCellModel(title: model.name, description: model.description, cancelAction: imageLoader.cancel)
     }
 }
-

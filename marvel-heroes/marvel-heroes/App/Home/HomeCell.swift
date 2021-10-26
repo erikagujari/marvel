@@ -7,11 +7,17 @@
 
 import UIKit
 
+struct HomeCellModel {
+    let title: String
+    let description: String?
+    let cancelAction: (() -> Void)?
+}
+
 final class HomeCell: UITableViewCell {
     private lazy var mainImageView: UIImageView = {
         let imageView = UIImageView()
                 
-        NSLayoutConstraint.activate([imageView.widthAnchor.constraint(equalToConstant: 60),
+        NSLayoutConstraint.activate([imageView.widthAnchor.constraint(equalToConstant: 100),
                                      imageView.heightAnchor.constraint(equalTo: imageView.widthAnchor)])
         
         return imageView
@@ -60,13 +66,14 @@ final class HomeCell: UITableViewCell {
         cancelAction?()
     }
     
-    func configure(model: MarvelCharacterModel) {
-        titleLabel.text = model.name
+    func configure(model: HomeCellModel) {
+        titleLabel.text = model.title
         if let modelDescription = model.description, !modelDescription.isEmpty {
             descriptionLabel.text = modelDescription
         } else {
             descriptionLabel.isHidden = true
         }
+        cancelAction = model.cancelAction
         pin(view: mainStackView, leading: 10.0, trailing: -10.0, top: 10.0, bottom: -10.0)
     }
     

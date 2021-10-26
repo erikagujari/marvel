@@ -17,6 +17,7 @@
 		4017544E2727007C00465F5E /* HomeUIComposer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4017544D2727007C00465F5E /* HomeUIComposer.swift */; };
 		4060A0D82727D53500966216 /* HomeIntegrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4060A0D72727D53500966216 /* HomeIntegrationTests.swift */; };
 		4060A0DA2727DF1200966216 /* XCTestCase+MemoryLeakTracking.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4060A0D92727DF1200966216 /* XCTestCase+MemoryLeakTracking.swift */; };
+		4060A0DC2727E28400966216 /* ImageLoaderUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4060A0DB2727E28400966216 /* ImageLoaderUseCase.swift */; };
 		4060CCAF272550EB00323E50 /* CharacterRepositoryTests+JSONMock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4060CCAE272550EB00323E50 /* CharacterRepositoryTests+JSONMock.swift */; };
 		4060CCB12725556A00323E50 /* FetchCharactersUseCaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4060CCB02725556A00323E50 /* FetchCharactersUseCaseTests.swift */; };
 		4060CCB527255A7D00323E50 /* FetchCharacterUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4060CCB427255A7D00323E50 /* FetchCharacterUseCase.swift */; };
@@ -55,6 +56,7 @@
 		4017544D2727007C00465F5E /* HomeUIComposer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeUIComposer.swift; sourceTree = "<group>"; };
 		4060A0D72727D53500966216 /* HomeIntegrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeIntegrationTests.swift; sourceTree = "<group>"; };
 		4060A0D92727DF1200966216 /* XCTestCase+MemoryLeakTracking.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "XCTestCase+MemoryLeakTracking.swift"; sourceTree = "<group>"; };
+		4060A0DB2727E28400966216 /* ImageLoaderUseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageLoaderUseCase.swift; sourceTree = "<group>"; };
 		4060CCAE272550EB00323E50 /* CharacterRepositoryTests+JSONMock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CharacterRepositoryTests+JSONMock.swift"; sourceTree = "<group>"; };
 		4060CCB02725556A00323E50 /* FetchCharactersUseCaseTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FetchCharactersUseCaseTests.swift; sourceTree = "<group>"; };
 		4060CCB427255A7D00323E50 /* FetchCharacterUseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FetchCharacterUseCase.swift; sourceTree = "<group>"; };
@@ -123,6 +125,7 @@
 			isa = PBXGroup;
 			children = (
 				4060CCB427255A7D00323E50 /* FetchCharacterUseCase.swift */,
+				4060A0DB2727E28400966216 /* ImageLoaderUseCase.swift */,
 			);
 			path = UseCases;
 			sourceTree = "<group>";
@@ -355,6 +358,7 @@
 				40FC7DB227242FDA002F2295 /* HomeViewController.swift in Sources */,
 				40FC7DBA27248334002F2295 /* MarvelError.swift in Sources */,
 				401754472726F85A00465F5E /* MarvelCharacterModel.swift in Sources */,
+				4060A0DC2727E28400966216 /* ImageLoaderUseCase.swift in Sources */,
 				4017544E2727007C00465F5E /* HomeUIComposer.swift in Sources */,
 				4017544C2726FFDE00465F5E /* UIView+Subviews.swift in Sources */,
 			);

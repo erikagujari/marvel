@@ -11,6 +11,10 @@ struct HomeCellModel {
     let title: String
     let description: String?
     let cancelAction: (() -> Void)?
+    
+    var willLoadImage: Bool {
+        return cancelAction != nil
+    }
 }
 
 final class HomeCell: UITableViewCell {
@@ -66,20 +70,28 @@ final class HomeCell: UITableViewCell {
         cancelAction?()
     }
     
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        
+        mainImageView.layer.cornerRadius = mainImageView.frame.width / 2
+        mainImageView.layer.borderWidth = 2.0
+        mainImageView.layer.borderColor = UIColor.black.cgColor
+        mainImageView.clipsToBounds = true
+    }
+    
     func configure(model: HomeCellModel) {
         titleLabel.text = model.title
-        if let modelDescription = model.description, !modelDescription.isEmpty {
-            descriptionLabel.text = modelDescription
-        } else {
-            descriptionLabel.isHidden = true
-        }
+        descriptionLabel.text = model.description
         cancelAction = model.cancelAction
         pin(view: mainStackView, leading: 10.0, trailing: -10.0, top: 10.0, bottom: -10.0)
+        
+        guard model.willLoadImage else { return }
+        
+        mainImageView.showSpinner()
     }
     
     func update(image: UIImage) {
+        mainImageView.dismissSpinner()
         mainImageView.image = image
-        mainImageView.layer.cornerRadius = mainImageView.frame.width / 2
-        mainImageView.clipsToBounds = true
     }
 }

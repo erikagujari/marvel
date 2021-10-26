@@ -15,6 +15,7 @@
 		401754492726FC1100465F5E /* HomeCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 401754482726FC1100465F5E /* HomeCell.swift */; };
 		4017544C2726FFDE00465F5E /* UIView+Subviews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4017544B2726FFDE00465F5E /* UIView+Subviews.swift */; };
 		4017544E2727007C00465F5E /* HomeUIComposer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4017544D2727007C00465F5E /* HomeUIComposer.swift */; };
+		4060A0D82727D53500966216 /* HomeIntegrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4060A0D72727D53500966216 /* HomeIntegrationTests.swift */; };
 		4060CCAF272550EB00323E50 /* CharacterRepositoryTests+JSONMock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4060CCAE272550EB00323E50 /* CharacterRepositoryTests+JSONMock.swift */; };
 		4060CCB12725556A00323E50 /* FetchCharactersUseCaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4060CCB02725556A00323E50 /* FetchCharactersUseCaseTests.swift */; };
 		4060CCB527255A7D00323E50 /* FetchCharacterUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4060CCB427255A7D00323E50 /* FetchCharacterUseCase.swift */; };
@@ -51,6 +52,7 @@
 		401754482726FC1100465F5E /* HomeCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeCell.swift; sourceTree = "<group>"; };
 		4017544B2726FFDE00465F5E /* UIView+Subviews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIView+Subviews.swift"; sourceTree = "<group>"; };
 		4017544D2727007C00465F5E /* HomeUIComposer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeUIComposer.swift; sourceTree = "<group>"; };
+		4060A0D72727D53500966216 /* HomeIntegrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeIntegrationTests.swift; sourceTree = "<group>"; };
 		4060CCAE272550EB00323E50 /* CharacterRepositoryTests+JSONMock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CharacterRepositoryTests+JSONMock.swift"; sourceTree = "<group>"; };
 		4060CCB02725556A00323E50 /* FetchCharactersUseCaseTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FetchCharactersUseCaseTests.swift; sourceTree = "<group>"; };
 		4060CCB427255A7D00323E50 /* FetchCharacterUseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FetchCharacterUseCase.swift; sourceTree = "<group>"; };
@@ -165,6 +167,7 @@
 				4060CCB02725556A00323E50 /* FetchCharactersUseCaseTests.swift */,
 				401754402726EF5300465F5E /* HomeViewModelTests.swift */,
 				401754422726F4CD00465F5E /* Helpers.swift */,
+				4060A0D72727D53500966216 /* HomeIntegrationTests.swift */,
 			);
 			path = "marvel-heroesTests";
 			sourceTree = "<group>";
@@ -359,6 +362,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				40FC7DBC27248445002F2295 /* CharacterRepositoryTests.swift in Sources */,
+				4060A0D82727D53500966216 /* HomeIntegrationTests.swift in Sources */,
 				4060CCAF272550EB00323E50 /* CharacterRepositoryTests+JSONMock.swift in Sources */,
 				4060CCB12725556A00323E50 /* FetchCharactersUseCaseTests.swift in Sources */,
 				401754432726F4CD00465F5E /* Helpers.swift in Sources */,

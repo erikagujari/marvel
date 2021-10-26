@@ -35,14 +35,6 @@ private extension HomeViewModelTests {
         return HomeViewModelProvider(fetchCharactersUseCase: FetchCharacterUseCaseStub(result: fetchUseCaseResult),
                                      limitRequest: 20)
     }
-    
-    struct FetchCharacterUseCaseStub: FetchCharacterUseCase {
-        let result: AnyPublisher<[MarvelCharacter], MarvelError>
-        
-        func execute(limit: Int, offset: Int) -> AnyPublisher<[MarvelCharacter], MarvelError> {
-            return result
-        }
-    }
 }
 
 extension MarvelCharacterModel: Equatable {

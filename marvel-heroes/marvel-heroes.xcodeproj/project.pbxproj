@@ -22,6 +22,7 @@
 		4060CCAF272550EB00323E50 /* CharacterRepositoryTests+JSONMock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4060CCAE272550EB00323E50 /* CharacterRepositoryTests+JSONMock.swift */; };
 		4060CCB12725556A00323E50 /* FetchCharactersUseCaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4060CCB02725556A00323E50 /* FetchCharactersUseCaseTests.swift */; };
 		4060CCB527255A7D00323E50 /* FetchCharacterUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4060CCB427255A7D00323E50 /* FetchCharacterUseCase.swift */; };
+		40E2090B272986CB004A25C0 /* ImageService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40E2090A272986CB004A25C0 /* ImageService.swift */; };
 		40FC7D8027242D87002F2295 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FC7D7F27242D87002F2295 /* AppDelegate.swift */; };
 		40FC7D8227242D87002F2295 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FC7D8127242D87002F2295 /* SceneDelegate.swift */; };
 		40FC7D8927242D89002F2295 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 40FC7D8827242D89002F2295 /* Assets.xcassets */; };
@@ -62,6 +63,7 @@
 		4060CCAE272550EB00323E50 /* CharacterRepositoryTests+JSONMock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CharacterRepositoryTests+JSONMock.swift"; sourceTree = "<group>"; };
 		4060CCB02725556A00323E50 /* FetchCharactersUseCaseTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FetchCharactersUseCaseTests.swift; sourceTree = "<group>"; };
 		4060CCB427255A7D00323E50 /* FetchCharacterUseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FetchCharacterUseCase.swift; sourceTree = "<group>"; };
+		40E2090A272986CB004A25C0 /* ImageService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageService.swift; sourceTree = "<group>"; };
 		40FC7D7C27242D87002F2295 /* marvel-heroes.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "marvel-heroes.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		40FC7D7F27242D87002F2295 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		40FC7D8127242D87002F2295 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -243,6 +245,7 @@
 			isa = PBXGroup;
 			children = (
 				40FC7DC527249BD7002F2295 /* CharacterService.swift */,
+				40E2090A272986CB004A25C0 /* ImageService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -352,6 +355,7 @@
 				40FC7DB8272482FA002F2295 /* HTTPClient.swift in Sources */,
 				4017543F2726E6CD00465F5E /* String+MD5.swift in Sources */,
 				40FC7DB6272482A4002F2295 /* Service.swift in Sources */,
+				40E2090B272986CB004A25C0 /* ImageService.swift in Sources */,
 				40FC7D8227242D87002F2295 /* SceneDelegate.swift in Sources */,
 				4060CCB527255A7D00323E50 /* FetchCharacterUseCase.swift in Sources */,
 				40FC7DC327249BB0002F2295 /* MarvelCharacter.swift in Sources */,

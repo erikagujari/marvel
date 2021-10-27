@@ -13,7 +13,7 @@ enum ServiceMethod: String {
 
 protocol Service {
     var baseURL: String { get }
-    var path: String { get }
+    var path: String? { get }
     var parameters: [String: Any]? { get }
     var method: ServiceMethod { get }
 }
@@ -41,7 +41,9 @@ extension Service {
 
     private var url: URL? {
         var urlComponents = URLComponents(string: baseURL)
-        urlComponents?.path = path
+        if let path = path {
+            urlComponents?.path = path
+        }
 
         if method == .get {
             guard let parameters = parameters as? [String: String] else { return urlComponents?.url }

@@ -19,7 +19,8 @@ enum CharacterService: Service {
     var baseURL: String {
         return "https://gateway.marvel.com:443"
     }
-    var path: String {
+    
+    var path: String? {
         switch self {
         case .list:
             return "/v1/public/characters"

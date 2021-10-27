@@ -9,45 +9,31 @@ import Combine
 import UIKit
 
 protocol ImageLoaderUseCase {
-    func fetch(from path: String, completion: @escaping (Result<UIImage, Error>) -> Void)
-    func cancel()
+    func fetch(from path: String) -> AnyPublisher<UIImage, MarvelError>
 }
 
 final class ImageLoaderProvider: ImageLoaderUseCase {
-    private let session: URLSession
+    private let client: HTTPClient
     private let cache: NSCache<NSString, UIImage>
-    private var task: URLSessionDataTask?
     
-    init(session: URLSession) {
-        self.session = session
+    init(client: HTTPClient) {
+        self.client = client
         self.cache = NSCache()
     }
     
-    func fetch(from path: String, completion: @escaping (Result<UIImage, Error>) -> Void) {
+    func fetch(from path: String) -> AnyPublisher<UIImage, MarvelError> {
         guard let cachedImage = cache.object(forKey: path as NSString) else {
-            guard let url = URL(string: path) else {
-                completion(.failure(MarvelError.serviceError))
-                return
-            }
-            
-            task = session.dataTask(with: url) { [weak self] data, urlResponse, error in
-                if let error = error {
-                    completion(.failure(error))
-                }
-                if let data = data,
-                   let image = UIImage(data: data) {
+            return client.fetch(request: ImageService.load(path))
+                .flatMap { [weak self] data -> AnyPublisher<UIImage, MarvelError> in
+                    guard let image = UIImage(data: data) else {
+                        return Fail<UIImage, MarvelError>(error: MarvelError.serviceError).eraseToAnyPublisher()
+                    }
+                    
                     self?.cache.setObject(image, forKey: path as NSString)
-                    completion(.success(image))
-                }
-            }
-            task?.resume()
-            return
+                    return Just(image).setFailureType(to: MarvelError.self).eraseToAnyPublisher()
+                }.eraseToAnyPublisher()
         }
         
-        completion(.success(cachedImage))
-    }
-    
-    func cancel() {
-        task?.cancel()
+        return Just(cachedImage).setFailureType(to: MarvelError.self).eraseToAnyPublisher()
     }
 }

@@ -20,6 +20,7 @@ final class HomeViewModelProvider: HomeViewModel {
     private let limitRequest: Int
     private let imageLoader: ImageLoaderUseCase
     private var cancellables = Set<AnyCancellable>()
+    private var cancellableImages = [AnyCancellable]()
     var characters = CurrentValueSubject<[MarvelCharacterModel], Never>([MarvelCharacterModel]())
     var showSpinner = PassthroughSubject<Bool, Never>()
     var title = CurrentValueSubject<String, Never>("Heroes")
@@ -28,6 +29,16 @@ final class HomeViewModelProvider: HomeViewModel {
         self.fetchCharactersUseCase = fetchCharactersUseCase
         self.limitRequest = limitRequest
         self.imageLoader = imageLoader
+    }
+    
+    private func assignImageFrom(path: String, to imageAction: @escaping (UIImage) -> Void) {
+        imageLoader.fetch(from: path)
+            .receive(on: RunLoop.main)
+            .sink { _ in }
+            receiveValue: { image in
+                imageAction(image)
+            }
+            .store(in: &cancellableImages)
     }
     
     func fetchInitialCharacters() {
@@ -48,13 +59,9 @@ final class HomeViewModelProvider: HomeViewModel {
             return HomeCellModel(title: model.name, description: model.description, cancelAction: nil)
         }
         
-        imageLoader.fetch(from: path) { result in
-            guard let image = try? result.get() else { return }
-            
-            DispatchQueue.main.async {
-                imageAction(image)
-            }
-        }
-        return HomeCellModel(title: model.name, description: model.description, cancelAction: imageLoader.cancel)
+        assignImageFrom(path: path, to: imageAction)
+        return HomeCellModel(title: model.name, description: model.description, cancelAction: { [weak self] in
+            self?.cancellableImages[index].cancel()
+        })
     }
 }

@@ -11,7 +11,10 @@ final class HomeUIComposer {
     private init() {}
     
     static func compose(fetchUseCase: FetchCharacterUseCase, limitRequest: Int) -> UIViewController {
-        let viewModel = HomeViewModelProvider(fetchCharactersUseCase: fetchUseCase, limitRequest: limitRequest, imageLoader: ImageLoaderProvider(session: .shared))
+        let imageLoader = ImageLoaderProvider(client: URLSessionHTTPClient(session: .shared))
+        let viewModel = HomeViewModelProvider(fetchCharactersUseCase: fetchUseCase,
+                                              limitRequest: limitRequest,
+                                              imageLoader: imageLoader)
         let navigation = UINavigationController(rootViewController: HomeViewController(viewModel: viewModel))
         navigation.navigationBar.prefersLargeTitles = true
         

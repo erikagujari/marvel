@@ -31,7 +31,9 @@ struct FetchCharacterUseCaseStub: FetchCharacterUseCase {
 }
 
 struct ImageLoaderUseCaseStub: ImageLoaderUseCase {
+    let result: AnyPublisher<UIImage, MarvelError>
+    
     func fetch(from path: String) -> AnyPublisher<UIImage, MarvelError> {
-        return Just(UIImage()).setFailureType(to: MarvelError.self).eraseToAnyPublisher()
+        return result
     }
 }

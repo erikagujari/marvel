@@ -8,6 +8,7 @@ import Foundation
 import Combine
 
 protocol HTTPClient {
+    func fetch(request: Service) -> AnyPublisher<Data, MarvelError>
     func fetch<T: Decodable>(_ request: Service, responseType: T.Type) -> AnyPublisher<T, MarvelError>
 }
 
@@ -18,7 +19,7 @@ final class URLSessionHTTPClient: HTTPClient {
         self.session = session
     }
     
-    func fetch<T: Decodable>(_ request: Service, responseType: T.Type) -> AnyPublisher<T, MarvelError> {
+    func fetch(request: Service) -> AnyPublisher<Data, MarvelError> {
         return session.dataTaskPublisher(for: request.urlRequest)
             .tryMap { data, response in
                 guard let httpResponse = response as? HTTPURLResponse else {
@@ -29,11 +30,24 @@ final class URLSessionHTTPClient: HTTPClient {
                     throw MarvelError.serviceError
                 }
                 
-                if let string = String(data: data, encoding: .utf8){
+                if let string = String(data: data, encoding: .utf8) {
                     print("JSON Response:\n\(string)")
                 }
                 return data
             }
+            .mapError { error -> MarvelError in
+                switch error {
+                case let error as MarvelError:
+                    return error
+                default:
+                    return MarvelError.serviceError
+                }
+            }
+            .eraseToAnyPublisher()
+    }
+    
+    func fetch<T: Decodable>(_ request: Service, responseType: T.Type) -> AnyPublisher<T, MarvelError> {
+        return fetch(request: request)
             .decode(type: T.self, decoder: JSONDecoder())
             .mapError { error -> MarvelError in
                 switch error {

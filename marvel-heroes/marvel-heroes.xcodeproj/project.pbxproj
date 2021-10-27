@@ -23,6 +23,7 @@
 		4060CCB12725556A00323E50 /* FetchCharactersUseCaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4060CCB02725556A00323E50 /* FetchCharactersUseCaseTests.swift */; };
 		4060CCB527255A7D00323E50 /* FetchCharacterUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4060CCB427255A7D00323E50 /* FetchCharacterUseCase.swift */; };
 		40E2090B272986CB004A25C0 /* ImageService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40E2090A272986CB004A25C0 /* ImageService.swift */; };
+		40E2090D27299686004A25C0 /* ImageLoaderUseCaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40E2090C27299686004A25C0 /* ImageLoaderUseCaseTests.swift */; };
 		40FC7D8027242D87002F2295 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FC7D7F27242D87002F2295 /* AppDelegate.swift */; };
 		40FC7D8227242D87002F2295 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FC7D8127242D87002F2295 /* SceneDelegate.swift */; };
 		40FC7D8927242D89002F2295 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 40FC7D8827242D89002F2295 /* Assets.xcassets */; };
@@ -64,6 +65,7 @@
 		4060CCB02725556A00323E50 /* FetchCharactersUseCaseTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FetchCharactersUseCaseTests.swift; sourceTree = "<group>"; };
 		4060CCB427255A7D00323E50 /* FetchCharacterUseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FetchCharacterUseCase.swift; sourceTree = "<group>"; };
 		40E2090A272986CB004A25C0 /* ImageService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageService.swift; sourceTree = "<group>"; };
+		40E2090C27299686004A25C0 /* ImageLoaderUseCaseTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageLoaderUseCaseTests.swift; sourceTree = "<group>"; };
 		40FC7D7C27242D87002F2295 /* marvel-heroes.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "marvel-heroes.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		40FC7D7F27242D87002F2295 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		40FC7D8127242D87002F2295 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -178,6 +180,7 @@
 				401754422726F4CD00465F5E /* Helpers.swift */,
 				4060A0D72727D53500966216 /* HomeIntegrationTests.swift */,
 				4060A0D92727DF1200966216 /* XCTestCase+MemoryLeakTracking.swift */,
+				40E2090C27299686004A25C0 /* ImageLoaderUseCaseTests.swift */,
 			);
 			path = "marvel-heroesTests";
 			sourceTree = "<group>";
@@ -382,6 +385,7 @@
 				4060A0DA2727DF1200966216 /* XCTestCase+MemoryLeakTracking.swift in Sources */,
 				4060CCB12725556A00323E50 /* FetchCharactersUseCaseTests.swift in Sources */,
 				401754432726F4CD00465F5E /* Helpers.swift in Sources */,
+				40E2090D27299686004A25C0 /* ImageLoaderUseCaseTests.swift in Sources */,
 				401754412726EF5300465F5E /* HomeViewModelTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

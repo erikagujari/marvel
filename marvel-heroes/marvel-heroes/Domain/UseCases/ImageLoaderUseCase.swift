@@ -16,9 +16,9 @@ final class ImageLoaderProvider: ImageLoaderUseCase {
     private let client: HTTPClient
     private let cache: NSCache<NSString, UIImage>
     
-    init(client: HTTPClient) {
+    init(client: HTTPClient, cache: NSCache<NSString, UIImage>) {
         self.client = client
-        self.cache = NSCache()
+        self.cache = cache
     }
     
     func fetch(from path: String) -> AnyPublisher<UIImage, MarvelError> {

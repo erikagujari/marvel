@@ -11,7 +11,7 @@ final class HomeUIComposer {
     private init() {}
     
     static func compose(fetchUseCase: FetchCharacterUseCase, limitRequest: Int) -> UIViewController {
-        let imageLoader = ImageLoaderProvider(client: URLSessionHTTPClient(session: .shared))
+        let imageLoader = ImageLoaderProvider(client: URLSessionHTTPClient(session: .shared), cache: NSCache())
         let viewModel = HomeViewModelProvider(fetchCharactersUseCase: fetchUseCase,
                                               limitRequest: limitRequest,
                                               imageLoader: imageLoader)

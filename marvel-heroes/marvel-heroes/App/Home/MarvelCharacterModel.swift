@@ -5,7 +5,7 @@
 //  Created by Erik Agujari on 25/10/21.
 //
 
-struct MarvelCharacterModel {
+struct MarvelCharacterModel: Equatable {
     let id: Int
     let name: String
     let description: String?

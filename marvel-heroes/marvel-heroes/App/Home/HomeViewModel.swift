@@ -13,9 +13,10 @@ protocol HomeViewModel {
     var title: CurrentValueSubject<String, Never> { get set }
     func fetchInitialCharacters()
     func cellModel(for index: Int, imageAction: @escaping (UIImage) -> Void) -> HomeCellModel
+    func willDisplayItemAt(_ index: Int)
 }
 
-final class HomeViewModelProvider: HomeViewModel {
+final class HomeViewModelProvider {
     private let fetchCharactersUseCase: FetchCharacterUseCase
     private let limitRequest: Int
     private let imageLoader: ImageLoaderUseCase
@@ -41,16 +42,24 @@ final class HomeViewModelProvider: HomeViewModel {
             .store(in: &cancellableImages)
     }
     
-    func fetchInitialCharacters() {
+    private func loadCharacters(offset: Int) {
         showSpinner.send(true)
-        fetchCharactersUseCase.execute(limit: limitRequest, offset: 0)
+        fetchCharactersUseCase.execute(limit: limitRequest, offset: offset)
             .sink { [weak self] result in
                 self?.showSpinner.send(false)
-            } receiveValue: { [weak self] characters in
-                let models = characters.compactMap { MarvelCharacterModel(from: $0) }
-                self?.characters.send(models)
+            } receiveValue: { [weak self] newCharacters in
+                guard let self = self else { return }
+                
+                let models = self.characters.value + newCharacters.compactMap { MarvelCharacterModel(from: $0) }
+                self.characters.send(models)
             }
             .store(in: &cancellables)
+    }
+}
+
+extension HomeViewModelProvider: HomeViewModel {
+    func fetchInitialCharacters() {
+        loadCharacters(offset: 0)
     }
     
     func cellModel(for index: Int, imageAction: @escaping (UIImage) -> Void) -> HomeCellModel {
@@ -63,5 +72,12 @@ final class HomeViewModelProvider: HomeViewModel {
         return HomeCellModel(title: model.name, description: model.description, cancelAction: { [weak self] in
             self?.cancellableImages[index].cancel()
         })
+    }
+    
+    func willDisplayItemAt(_ index: Int) {
+        let characters = characters.value
+        guard let last = characters.last, characters[index] == last else { return }
+        
+        loadCharacters(offset: characters.count)
     }
 }

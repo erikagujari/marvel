@@ -67,9 +67,3 @@ private extension HomeViewModelTests {
                                      imageLoader: ImageLoaderUseCaseStub(result: imageLoaderResult))
     }
 }
-
-extension MarvelCharacterModel: Equatable {
-    public static func == (lhs: MarvelCharacterModel, rhs: MarvelCharacterModel) -> Bool {
-        return lhs.id == rhs.id
-    }
-}

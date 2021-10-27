@@ -67,6 +67,7 @@ final class HomeCell: UITableViewCell {
     var cancelAction: (() -> Void)?
     
     override func prepareForReuse() {
+        mainImageView.image = nil
         cancelAction?()
     }
     
@@ -87,6 +88,7 @@ final class HomeCell: UITableViewCell {
         
         guard model.willLoadImage else { return }
         
+        mainImageView.dismissSpinner()
         mainImageView.showSpinner()
     }
     

@@ -18,10 +18,19 @@ struct MarvelCharacterResponse: Decodable {
     let name: String?
     let description: String?
     let modified: String?
-    let thumbnail: Thumbnail
+    let thumbnail: ThumbnailResponse
+    let comics: ComicsResponse?
 }
 
-struct Thumbnail: Decodable {
+struct ComicsResponse: Decodable {
+    let items: [ComicResponse]
+}
+
+struct ComicResponse: Decodable {
+    let name: String
+}
+
+struct ThumbnailResponse: Decodable {
     let path: String?
     let fileExtension: String?
     

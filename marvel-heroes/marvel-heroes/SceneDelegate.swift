@@ -15,9 +15,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         
         window = UIWindow(frame: windowScene.coordinateSpace.bounds)
         window?.windowScene = windowScene
-        window?.rootViewController = HomeUIComposer.compose(fetchUseCase: FetchCharacterUseCaseProvider(repository: CharacterRepositoryProvider(httpClient: URLSessionHTTPClient(session: .shared)),
-                                                                                                        bundle: .main),
-                                                            limitRequest: 20)
+        window?.rootViewController = HomeUIComposer.compose(limitRequest: 20)
         window?.makeKeyAndVisible()
     }
 }

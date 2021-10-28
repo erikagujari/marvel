@@ -100,6 +100,7 @@ extension HomeViewController {
     }
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        tableView.deselectRow(at: indexPath, animated: false)
         router.showDetail(id: viewModel.idForRowAt(indexPath.row))
     }
 }

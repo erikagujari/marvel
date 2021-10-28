@@ -24,6 +24,13 @@
 		4060CCB527255A7D00323E50 /* FetchCharacterUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4060CCB427255A7D00323E50 /* FetchCharacterUseCase.swift */; };
 		4075CE56272A89A900D4183B /* HomeRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4075CE55272A89A900D4183B /* HomeRouter.swift */; };
 		4075CE5B272A930C00D4183B /* HomeCellModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4075CE5A272A930C00D4183B /* HomeCellModel.swift */; };
+		4075CE61272AE14500D4183B /* DetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4075CE60272AE14500D4183B /* DetailViewController.swift */; };
+		4075CE63272AE18F00D4183B /* DetailViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4075CE62272AE18F00D4183B /* DetailViewModel.swift */; };
+		4075CE65272AE1C800D4183B /* DetailRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4075CE64272AE1C800D4183B /* DetailRouter.swift */; };
+		4075CE67272AE25600D4183B /* DetailUIComposer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4075CE66272AE25600D4183B /* DetailUIComposer.swift */; };
+		4075CE69272AEF5800D4183B /* AuthorizedUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4075CE68272AEF5800D4183B /* AuthorizedUseCase.swift */; };
+		4075CE6B272AF13D00D4183B /* FetchCharacterDetailUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4075CE6A272AF13D00D4183B /* FetchCharacterDetailUseCase.swift */; };
+		4075CE6D272AF16400D4183B /* CharacterDetailResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4075CE6C272AF16400D4183B /* CharacterDetailResponse.swift */; };
 		40E2090B272986CB004A25C0 /* ImageService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40E2090A272986CB004A25C0 /* ImageService.swift */; };
 		40E2090D27299686004A25C0 /* ImageLoaderUseCaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40E2090C27299686004A25C0 /* ImageLoaderUseCaseTests.swift */; };
 		40FC7D8027242D87002F2295 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FC7D7F27242D87002F2295 /* AppDelegate.swift */; };
@@ -68,6 +75,13 @@
 		4060CCB427255A7D00323E50 /* FetchCharacterUseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FetchCharacterUseCase.swift; sourceTree = "<group>"; };
 		4075CE55272A89A900D4183B /* HomeRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeRouter.swift; sourceTree = "<group>"; };
 		4075CE5A272A930C00D4183B /* HomeCellModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeCellModel.swift; sourceTree = "<group>"; };
+		4075CE60272AE14500D4183B /* DetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailViewController.swift; sourceTree = "<group>"; };
+		4075CE62272AE18F00D4183B /* DetailViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailViewModel.swift; sourceTree = "<group>"; };
+		4075CE64272AE1C800D4183B /* DetailRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailRouter.swift; sourceTree = "<group>"; };
+		4075CE66272AE25600D4183B /* DetailUIComposer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailUIComposer.swift; sourceTree = "<group>"; };
+		4075CE68272AEF5800D4183B /* AuthorizedUseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthorizedUseCase.swift; sourceTree = "<group>"; };
+		4075CE6A272AF13D00D4183B /* FetchCharacterDetailUseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FetchCharacterDetailUseCase.swift; sourceTree = "<group>"; };
+		4075CE6C272AF16400D4183B /* CharacterDetailResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CharacterDetailResponse.swift; sourceTree = "<group>"; };
 		40E2090A272986CB004A25C0 /* ImageService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageService.swift; sourceTree = "<group>"; };
 		40E2090C27299686004A25C0 /* ImageLoaderUseCaseTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageLoaderUseCaseTests.swift; sourceTree = "<group>"; };
 		40FC7D7C27242D87002F2295 /* marvel-heroes.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "marvel-heroes.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -136,6 +150,8 @@
 			children = (
 				4060CCB427255A7D00323E50 /* FetchCharacterUseCase.swift */,
 				4060A0DB2727E28400966216 /* ImageLoaderUseCase.swift */,
+				4075CE68272AEF5800D4183B /* AuthorizedUseCase.swift */,
+				4075CE6A272AF13D00D4183B /* FetchCharacterDetailUseCase.swift */,
 			);
 			path = UseCases;
 			sourceTree = "<group>";
@@ -177,6 +193,10 @@
 		4075CE5F272AE0CD00D4183B /* Detail */ = {
 			isa = PBXGroup;
 			children = (
+				4075CE60272AE14500D4183B /* DetailViewController.swift */,
+				4075CE62272AE18F00D4183B /* DetailViewModel.swift */,
+				4075CE64272AE1C800D4183B /* DetailRouter.swift */,
+				4075CE66272AE25600D4183B /* DetailUIComposer.swift */,
 			);
 			path = Detail;
 			sourceTree = "<group>";
@@ -286,6 +306,7 @@
 			isa = PBXGroup;
 			children = (
 				40FC7DC227249BB0002F2295 /* MarvelCharacterResponse.swift */,
+				4075CE6C272AF16400D4183B /* CharacterDetailResponse.swift */,
 			);
 			path = Entities;
 			sourceTree = "<group>";
@@ -405,19 +426,26 @@
 				4017543F2726E6CD00465F5E /* String+MD5.swift in Sources */,
 				40FC7DB6272482A4002F2295 /* Service.swift in Sources */,
 				40E2090B272986CB004A25C0 /* ImageService.swift in Sources */,
+				4075CE6B272AF13D00D4183B /* FetchCharacterDetailUseCase.swift in Sources */,
 				40FC7D8227242D87002F2295 /* SceneDelegate.swift in Sources */,
 				4060CCB527255A7D00323E50 /* FetchCharacterUseCase.swift in Sources */,
 				40FC7DC327249BB0002F2295 /* MarvelCharacterResponse.swift in Sources */,
+				4075CE65272AE1C800D4183B /* DetailRouter.swift in Sources */,
 				4075CE56272A89A900D4183B /* HomeRouter.swift in Sources */,
 				401754452726F82200465F5E /* HomeViewModel.swift in Sources */,
+				4075CE63272AE18F00D4183B /* DetailViewModel.swift in Sources */,
+				4075CE61272AE14500D4183B /* DetailViewController.swift in Sources */,
 				4075CE5B272A930C00D4183B /* HomeCellModel.swift in Sources */,
 				401754492726FC1100465F5E /* HomeCell.swift in Sources */,
 				40FC7DC027249B96002F2295 /* CharacterRepository.swift in Sources */,
 				40FC7DC627249BD7002F2295 /* CharacterService.swift in Sources */,
 				40FC7DB227242FDA002F2295 /* HomeViewController.swift in Sources */,
 				40FC7DBA27248334002F2295 /* MarvelError.swift in Sources */,
+				4075CE69272AEF5800D4183B /* AuthorizedUseCase.swift in Sources */,
 				401754472726F85A00465F5E /* MarvelCharacter.swift in Sources */,
+				4075CE6D272AF16400D4183B /* CharacterDetailResponse.swift in Sources */,
 				4060A0DC2727E28400966216 /* ImageLoaderUseCase.swift in Sources */,
+				4075CE67272AE25600D4183B /* DetailUIComposer.swift in Sources */,
 				4017544E2727007C00465F5E /* HomeUIComposer.swift in Sources */,
 				4017544C2726FFDE00465F5E /* UIView+Subviews.swift in Sources */,
 			);

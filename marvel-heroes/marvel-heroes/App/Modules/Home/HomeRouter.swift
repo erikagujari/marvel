@@ -14,7 +14,7 @@ protocol HomeRouterProtocol {
 
 final class HomeRouter: HomeRouterProtocol {
     weak var viewController: UIViewController?
-            
+    
     func showError(title: String, message: String) {
         let alertController = UIAlertController(title: title,
                                                 message: message,
@@ -30,6 +30,7 @@ final class HomeRouter: HomeRouterProtocol {
     }
     
     func showDetail(id: Int) {
-        
+        let detail = DetailUIComposer.compose(id: id)
+        viewController?.navigationController?.pushViewController(detail, animated: true)
     }
 }

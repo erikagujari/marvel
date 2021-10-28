@@ -7,9 +7,8 @@
 import Combine
 import UIKit
 
-protocol HomeViewModelProtocol {
+protocol HomeViewModelProtocol: BaseViewModel {
     var characters: CurrentValueSubject<[MarvelCharacter], Never> { get set }
-    var showSpinner: PassthroughSubject<Bool, Never> { get set }
     var showError: PassthroughSubject<(String, String), Never> { get set }
     var title: CurrentValueSubject<String, Never> { get set }
     func fetchInitialCharacters()

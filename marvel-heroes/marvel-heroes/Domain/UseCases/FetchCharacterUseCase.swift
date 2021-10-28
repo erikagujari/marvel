@@ -13,33 +13,26 @@ protocol FetchCharacterUseCase {
 
 struct FetchCharacterUseCaseProvider: FetchCharacterUseCase {
     private let repository: CharacterRepository
-    private let bundle: Bundle
+    private let authorization: AuthorizedUseCase
     
-    init(repository: CharacterRepository, bundle: Bundle) {
+    init(repository: CharacterRepository, authorization: AuthorizedUseCase) {
         self.repository = repository
-        self.bundle = bundle
+        self.authorization = authorization
     }
     
     func execute(limit: Int, offset: Int) -> AnyPublisher<[MarvelCharacterResponse], MarvelError> {
-        guard let publicKey = bundle.object(forInfoDictionaryKey: "API_PUBLIC_KEY") as? String,
-              let privateKey = bundle.object(forInfoDictionaryKey: "API_PRIVATE_KEY") as? String else {
-            return Fail<[MarvelCharacterResponse], MarvelError>(error: MarvelError.apiKeyError).eraseToAnyPublisher()
-        }
-                
-        let timestamp = String(Date().timeIntervalSince1970)
-        let parameters = CharacterService.ListParameters(limit: limit,
-                                                         offset: offset,
-                                                         apiKey: publicKey,
-                                                         timestamp: timestamp,
-                                                         hash: "\(timestamp)\(privateKey)\(publicKey)".toMD5String())
-        return repository.fetch(parameters: parameters)
-            .flatMap { characters -> AnyPublisher<[MarvelCharacterResponse], MarvelError> in
-                guard characters.isEmpty else {
-                    return Just<[MarvelCharacterResponse]>(characters).setFailureType(to: MarvelError.self).eraseToAnyPublisher()
-                }
-                
-                return Fail<[MarvelCharacterResponse], MarvelError>(error: MarvelError.serviceError).eraseToAnyPublisher()
-            }
-            .eraseToAnyPublisher()
+        return authorization.execute()
+            .flatMap { authorizationParameters -> AnyPublisher<[MarvelCharacterResponse], MarvelError> in
+                let parameters = CharacterService.ListParameters(limit: limit, offset: offset)
+                return repository.fetch(parameters: parameters, authorization: authorizationParameters)
+                    .flatMap { characters -> AnyPublisher<[MarvelCharacterResponse], MarvelError> in
+                        guard characters.isEmpty else {
+                            return Just<[MarvelCharacterResponse]>(characters).setFailureType(to: MarvelError.self).eraseToAnyPublisher()
+                        }
+                        
+                        return Fail<[MarvelCharacterResponse], MarvelError>(error: MarvelError.serviceError).eraseToAnyPublisher()
+                    }
+                    .eraseToAnyPublisher()
+            }.eraseToAnyPublisher()
     }
 }

@@ -107,8 +107,8 @@ private extension CharacterRepositoryTests {
     func expect(sut: CharacterRepository, endsWithResult expectedResult: Subscribers.Completion<MarvelError>, file: StaticString = #filePath, line: UInt = #line) {
         let exp = expectation(description: "Waiting to complete fetch")
         var cancellables = Set<AnyCancellable>()
-        
-        sut.fetch(parameters: CharacterService.ListParameters(limit: 0, offset: 0, apiKey: "", timestamp: "", hash: ""))
+                
+        sut.fetch(parameters: CharacterService.ListParameters(limit: 0, offset: 0), authorization: CharacterService.AuthorizationParameters(apiKey: "", timestamp: "", hash: ""))
             .sink { receivedResult in
                 XCTAssertEqual(expectedResult, receivedResult, file: file, line: line)
                 exp.fulfill()

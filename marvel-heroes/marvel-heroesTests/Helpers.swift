@@ -10,7 +10,7 @@ import UIKit
 
 func anyMarvelCharacterList(ids: [Int] = [0]) -> [MarvelCharacterResponse] {
     return ids.map { id in
-        MarvelCharacterResponse(id: id, name: "", description: "", modified: "", thumbnail: Thumbnail(path: "", fileExtension: ""))
+        MarvelCharacterResponse(id: id, name: "", description: "", modified: "", thumbnail: ThumbnailResponse(path: "", fileExtension: ""), comics: nil)
     }
 }
 

@@ -68,7 +68,7 @@ final class FetchCharacterUseCaseTests: XCTestCase {
 private extension FetchCharacterUseCaseTests {
     func makeSUT(result: AnyPublisher<[MarvelCharacterResponse], MarvelError>, dictionary: [String: Any]? = nil) -> FetchCharacterUseCase {
         return FetchCharacterUseCaseProvider(repository: CharacterRepositoryStub(result: result),
-                                             bundle: TestBundle(dictionary: dictionary ?? anyValidBundleDictionary()))
+                                             authorization: AuthorizedUseCaseProvider(bundle: TestBundle(dictionary: dictionary ?? anyValidBundleDictionary())))
     }
     
     func expect(sut: FetchCharacterUseCase, endsWithResult expectedResult: Subscribers.Completion<MarvelError>, file: StaticString = #filePath, line: UInt = #line) {
@@ -94,7 +94,11 @@ private extension FetchCharacterUseCaseTests {
             self.result = result
         }
         
-        func fetch(parameters: CharacterService.ListParameters) -> AnyPublisher<[MarvelCharacterResponse], MarvelError> {
+        func fetchDetail(id: Int, authorization: CharacterService.AuthorizationParameters) -> AnyPublisher<CharacterDetailResponse, MarvelError> {
+            return Fail(error: MarvelError.serviceError).eraseToAnyPublisher()
+        }
+        
+        func fetch(parameters: CharacterService.ListParameters, authorization: CharacterService.AuthorizationParameters) -> AnyPublisher<[MarvelCharacterResponse], MarvelError> {
             return result
         }
     }

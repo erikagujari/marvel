@@ -1,5 +1,5 @@
 //
-//  MarvelCharacter.swift
+//  MarvelCharacterResponse.swift
 //  marvel-heroes
 //
 //  Created by Erik Agujari on 23/10/21.
@@ -10,10 +10,10 @@ struct CharactersResponse: Decodable {
 }
 
 struct CharactersResponseData: Decodable {
-    let results: [MarvelCharacter]
+    let results: [MarvelCharacterResponse]
 }
 
-struct MarvelCharacter: Decodable {
+struct MarvelCharacterResponse: Decodable {
     let id: Int?
     let name: String?
     let description: String?

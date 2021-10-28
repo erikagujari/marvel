@@ -11,20 +11,20 @@ import XCTest
 final class FetchCharacterUseCaseTests: XCTestCase {
     func test_executeFails_onRepositoryError() {
         let error = MarvelError.serviceError
-        let sut = makeSUT(result: Fail<[MarvelCharacter], MarvelError>(error: error).eraseToAnyPublisher())
+        let sut = makeSUT(result: Fail<[MarvelCharacterResponse], MarvelError>(error: error).eraseToAnyPublisher())
         
         expect(sut: sut, endsWithResult: .failure(error))
     }
     
     func test_executeFails_onRepositoryEmptyList() {
-        let sut = makeSUT(result: Just<[MarvelCharacter]>([]).setFailureType(to: MarvelError.self).eraseToAnyPublisher())
+        let sut = makeSUT(result: Just<[MarvelCharacterResponse]>([]).setFailureType(to: MarvelError.self).eraseToAnyPublisher())
         
         expect(sut: sut, endsWithResult: .failure(.serviceError))
     }
     
     func test_execeuteFails_onEmptyBundleDictionary() {
         let characters = anyMarvelCharacterList()
-        let sut = makeSUT(result: Just<[MarvelCharacter]>(characters).setFailureType(to: MarvelError.self).eraseToAnyPublisher(),
+        let sut = makeSUT(result: Just<[MarvelCharacterResponse]>(characters).setFailureType(to: MarvelError.self).eraseToAnyPublisher(),
                           dictionary: [:])
         
         expect(sut: sut, endsWithResult: .failure(.apiKeyError))
@@ -32,7 +32,7 @@ final class FetchCharacterUseCaseTests: XCTestCase {
     
     func test_executeFails_onBundleDictionaryWithoutKey() {
         let characters = anyMarvelCharacterList()
-        let sut = makeSUT(result: Just<[MarvelCharacter]>(characters).setFailureType(to: MarvelError.self).eraseToAnyPublisher(),
+        let sut = makeSUT(result: Just<[MarvelCharacterResponse]>(characters).setFailureType(to: MarvelError.self).eraseToAnyPublisher(),
                           dictionary: ["NOT_API_KEY": "any value"])
         
         expect(sut: sut, endsWithResult: .failure(.apiKeyError))
@@ -40,7 +40,7 @@ final class FetchCharacterUseCaseTests: XCTestCase {
     
     func test_executeFails_onBundleDictionaryWithoutApiPublicKeyStringType() {
         let characters = anyMarvelCharacterList()
-        let sut = makeSUT(result: Just<[MarvelCharacter]>(characters).setFailureType(to: MarvelError.self).eraseToAnyPublisher(),
+        let sut = makeSUT(result: Just<[MarvelCharacterResponse]>(characters).setFailureType(to: MarvelError.self).eraseToAnyPublisher(),
                           dictionary: ["API_PUBLIC_KEY": 1])
         
         expect(sut: sut, endsWithResult: .failure(.apiKeyError))
@@ -48,7 +48,7 @@ final class FetchCharacterUseCaseTests: XCTestCase {
     
     func test_executeFails_onBundleDictionaryWithoutApiPrivateKeyStringType() {
         let characters = anyMarvelCharacterList()
-        let sut = makeSUT(result: Just<[MarvelCharacter]>(characters).setFailureType(to: MarvelError.self).eraseToAnyPublisher(),
+        let sut = makeSUT(result: Just<[MarvelCharacterResponse]>(characters).setFailureType(to: MarvelError.self).eraseToAnyPublisher(),
                           dictionary: ["API_PUBLIC_KEY": "1",
                                        "API_PRIVATE_KEY": 1])
         
@@ -57,7 +57,7 @@ final class FetchCharacterUseCaseTests: XCTestCase {
     
     func test_executeFinishes_onRepositoryNotEmptyList_andValidBundleDictionary() {
         let characters = anyMarvelCharacterList()
-        let sut = makeSUT(result: Just<[MarvelCharacter]>(characters).setFailureType(to: MarvelError.self).eraseToAnyPublisher(),
+        let sut = makeSUT(result: Just<[MarvelCharacterResponse]>(characters).setFailureType(to: MarvelError.self).eraseToAnyPublisher(),
                           dictionary: ["API_PUBLIC_KEY": "1",
                                        "API_PRIVATE_KEY": "1"])
 
@@ -66,7 +66,7 @@ final class FetchCharacterUseCaseTests: XCTestCase {
 }
 
 private extension FetchCharacterUseCaseTests {
-    func makeSUT(result: AnyPublisher<[MarvelCharacter], MarvelError>, dictionary: [String: Any]? = nil) -> FetchCharacterUseCase {
+    func makeSUT(result: AnyPublisher<[MarvelCharacterResponse], MarvelError>, dictionary: [String: Any]? = nil) -> FetchCharacterUseCase {
         return FetchCharacterUseCaseProvider(repository: CharacterRepositoryStub(result: result),
                                              bundle: TestBundle(dictionary: dictionary ?? anyValidBundleDictionary()))
     }
@@ -88,13 +88,13 @@ private extension FetchCharacterUseCaseTests {
     }
     
     struct CharacterRepositoryStub: CharacterRepository {
-        private let result: AnyPublisher<[MarvelCharacter], MarvelError>
+        private let result: AnyPublisher<[MarvelCharacterResponse], MarvelError>
         
-        init(result: AnyPublisher<[MarvelCharacter], MarvelError>) {
+        init(result: AnyPublisher<[MarvelCharacterResponse], MarvelError>) {
             self.result = result
         }
         
-        func fetch(parameters: CharacterService.ListParameters) -> AnyPublisher<[MarvelCharacter], MarvelError> {
+        func fetch(parameters: CharacterService.ListParameters) -> AnyPublisher<[MarvelCharacterResponse], MarvelError> {
             return result
         }
     }

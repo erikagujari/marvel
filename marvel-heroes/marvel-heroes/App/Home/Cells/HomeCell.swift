@@ -7,16 +7,6 @@
 
 import UIKit
 
-struct HomeCellModel {
-    let title: String
-    let description: String?
-    let cancelAction: (() -> Void)?
-    
-    var willLoadImage: Bool {
-        return cancelAction != nil
-    }
-}
-
 final class HomeCell: UITableViewCell {
     private lazy var mainImageView: UIImageView = {
         let imageView = UIImageView()

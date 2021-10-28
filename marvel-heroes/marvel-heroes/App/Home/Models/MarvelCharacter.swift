@@ -1,17 +1,17 @@
 //
-//  MarvelCharacterModel.swift
+//  MarvelCharacter.swift
 //  marvel-heroes
 //
 //  Created by Erik Agujari on 25/10/21.
 //
 
-struct MarvelCharacterModel: Equatable {
+struct MarvelCharacter: Equatable {
     let id: Int
     let name: String
     let description: String?
     let imagePath: String?
     
-    init?(from character: MarvelCharacter) {
+    init?(from character: MarvelCharacterResponse) {
         guard let id = character.id,
               let name = character.name
         else { return nil }

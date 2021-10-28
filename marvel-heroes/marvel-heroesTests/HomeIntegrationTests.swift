@@ -10,7 +10,7 @@ import XCTest
 
 final class HomeIntegrationTests: XCTestCase {
     func test_loadView_doesNotUpdateTableViewOnViewModelError() {
-        let (sut, _) = makeSUT(initialResult: Fail<[MarvelCharacter], MarvelError>(error: MarvelError.serviceError).eraseToAnyPublisher())
+        let (sut, _) = makeSUT(initialResult: Fail<[MarvelCharacterResponse], MarvelError>(error: MarvelError.serviceError).eraseToAnyPublisher())
         
         sut.loadViewIfNeeded()
         
@@ -42,7 +42,7 @@ final class HomeIntegrationTests: XCTestCase {
     }
     
     func test_loadView_showsErrorOnViewModelError() {
-        let (sut, router) = makeSUT(initialResult: Fail<[MarvelCharacter], MarvelError>(error: MarvelError.serviceError).eraseToAnyPublisher())
+        let (sut, router) = makeSUT(initialResult: Fail<[MarvelCharacterResponse], MarvelError>(error: MarvelError.serviceError).eraseToAnyPublisher())
         let exp = expectation(description: "Waiting to show error")
         
         router.showedErrorAction = {
@@ -55,7 +55,7 @@ final class HomeIntegrationTests: XCTestCase {
 }
 
 private extension HomeIntegrationTests {
-    func makeSUT(initialResult: AnyPublisher<[MarvelCharacter], MarvelError>, delay: Double? = nil) -> (HomeViewController, HomeRouterSpy) {
+    func makeSUT(initialResult: AnyPublisher<[MarvelCharacterResponse], MarvelError>, delay: Double? = nil) -> (HomeViewController, HomeRouterSpy) {
         let fetchCharacterUseCase = FetchCharacterUseCaseStub(firstLoadResult: initialResult, delay: delay)
         let viewModel = HomeViewModel(fetchCharactersUseCase: fetchCharacterUseCase,
                                               limitRequest: 10,

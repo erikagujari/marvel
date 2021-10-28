@@ -10,7 +10,7 @@ import XCTest
 
 final class HomeViewModelTests: XCTestCase {
     func test_fetchInitialCharacters_doesNotLoadCharactersOnUseCaseError() {
-        let sut = makeSUT(fetchUseCaseResult: Fail<[MarvelCharacter], MarvelError>(error: MarvelError.serviceError).eraseToAnyPublisher())
+        let sut = makeSUT(fetchUseCaseResult: Fail<[MarvelCharacterResponse], MarvelError>(error: MarvelError.serviceError).eraseToAnyPublisher())
         let initialValue = sut.characters.value
         
         sut.fetchInitialCharacters()
@@ -98,9 +98,9 @@ final class HomeViewModelTests: XCTestCase {
 }
 
 private extension HomeViewModelTests {
-    func makeSUT(fetchUseCaseResult: AnyPublisher<[MarvelCharacter], MarvelError>,
+    func makeSUT(fetchUseCaseResult: AnyPublisher<[MarvelCharacterResponse], MarvelError>,
                  imageLoaderResult: AnyPublisher<UIImage, MarvelError> = Just(UIImage()).setFailureType(to: MarvelError.self).eraseToAnyPublisher(),
-                 nextLoadResult: AnyPublisher<[MarvelCharacter], MarvelError> = Just(anyMarvelCharacterList(ids: [3,4,5])).setFailureType(to: MarvelError.self).eraseToAnyPublisher()) -> HomeViewModelProtocol {
+                 nextLoadResult: AnyPublisher<[MarvelCharacterResponse], MarvelError> = Just(anyMarvelCharacterList(ids: [3,4,5])).setFailureType(to: MarvelError.self).eraseToAnyPublisher()) -> HomeViewModelProtocol {
         let fetchUseCase = FetchCharacterUseCaseStub(firstLoadResult: fetchUseCaseResult, nextLoadResult: nextLoadResult)
         return HomeViewModel(fetchCharactersUseCase: fetchUseCase,
                                      limitRequest: 20,

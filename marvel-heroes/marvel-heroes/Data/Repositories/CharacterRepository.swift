@@ -7,7 +7,7 @@
 import Combine
 
 protocol CharacterRepository {
-    func fetch(parameters: CharacterService.ListParameters) -> AnyPublisher<[MarvelCharacter], MarvelError>
+    func fetch(parameters: CharacterService.ListParameters) -> AnyPublisher<[MarvelCharacterResponse], MarvelError>
 }
 
 struct CharacterRepositoryProvider: CharacterRepository {
@@ -17,7 +17,7 @@ struct CharacterRepositoryProvider: CharacterRepository {
         self.httpClient = httpClient
     }
     
-    func fetch(parameters: CharacterService.ListParameters) -> AnyPublisher<[MarvelCharacter], MarvelError> {
+    func fetch(parameters: CharacterService.ListParameters) -> AnyPublisher<[MarvelCharacterResponse], MarvelError> {
         return httpClient.fetch(CharacterService.list(parameters: parameters), responseType: CharactersResponse.self)
             .map { response in
                 return response.data.results

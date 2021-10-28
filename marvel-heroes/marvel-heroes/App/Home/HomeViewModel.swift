@@ -8,7 +8,7 @@ import Combine
 import UIKit
 
 protocol HomeViewModelProtocol {
-    var characters: CurrentValueSubject<[MarvelCharacterModel], Never> { get set }
+    var characters: CurrentValueSubject<[MarvelCharacter], Never> { get set }
     var showSpinner: PassthroughSubject<Bool, Never> { get set }
     var showError: PassthroughSubject<(String, String), Never> { get set }
     var title: CurrentValueSubject<String, Never> { get set }
@@ -24,7 +24,7 @@ final class HomeViewModel {
     private let imageLoader: ImageLoaderUseCase
     private var cancellables = Set<AnyCancellable>()
     private var cancellableImages = [AnyCancellable]()
-    var characters = CurrentValueSubject<[MarvelCharacterModel], Never>([MarvelCharacterModel]())
+    var characters = CurrentValueSubject<[MarvelCharacter], Never>([MarvelCharacter]())
     var showSpinner = PassthroughSubject<Bool, Never>()
     var showError = PassthroughSubject<(String, String), Never>()
     var title = CurrentValueSubject<String, Never>("Heroes")
@@ -56,7 +56,7 @@ final class HomeViewModel {
             } receiveValue: { [weak self] newCharacters in
                 guard let self = self else { return }
                 
-                let models = self.characters.value + newCharacters.compactMap { MarvelCharacterModel(from: $0) }
+                let models = self.characters.value + newCharacters.compactMap { MarvelCharacter(from: $0) }
                 self.characters.send(models)
             }
             .store(in: &cancellables)

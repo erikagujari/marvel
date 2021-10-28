@@ -57,12 +57,52 @@ final class HomeViewModelTests: XCTestCase {
         
         wait(for: [exp], timeout: 1.0)
     }
+    
+    func test_willDisplayItemAtIndex_doesNotLoadMoreCharactersOnNotValidId() {
+        let sut = makeSUT(fetchUseCaseResult: Just(anyMarvelCharacterList(ids: [0, 1])).setFailureType(to: MarvelError.self).eraseToAnyPublisher(),
+                          imageLoaderResult: Fail(error: MarvelError.apiKeyError).eraseToAnyPublisher())
+        
+        sut.fetchInitialCharacters()
+        let itemsAfterInitialFetch = sut.characters.value
+        sut.willDisplayItemAt(0)
+        let itemsAfterDisplayItemAt = sut.characters.value
+        
+        XCTAssertEqual(itemsAfterInitialFetch, itemsAfterDisplayItemAt)
+    }
+    
+    func test_willDisplayItemAtIndex_doesNotLoadMoreCharactersOnValidId_whenNextLoadIsFailure() {
+        let sut = makeSUT(fetchUseCaseResult: Just(anyMarvelCharacterList(ids: [0, 1])).setFailureType(to: MarvelError.self).eraseToAnyPublisher(),
+                          imageLoaderResult: Fail(error: MarvelError.apiKeyError).eraseToAnyPublisher(),
+                          nextLoadResult: Fail(error: MarvelError.serviceError).eraseToAnyPublisher())
+        
+        sut.fetchInitialCharacters()
+        let itemsAfterInitialFetch = sut.characters.value
+        sut.willDisplayItemAt(1)
+        let itemsAfterDisplayItemAt = sut.characters.value
+        
+        XCTAssertEqual(itemsAfterInitialFetch, itemsAfterDisplayItemAt)
+    }
+    
+    func test_willDisplayItemAtIndex_loadsMoreCharatersOnValidId_whenNextLoadIsSuccess() {
+        let sut = makeSUT(fetchUseCaseResult: Just(anyMarvelCharacterList(ids: [0, 1])).setFailureType(to: MarvelError.self).eraseToAnyPublisher(),
+                          imageLoaderResult: Fail(error: MarvelError.apiKeyError).eraseToAnyPublisher(),
+                          nextLoadResult: Just(anyMarvelCharacterList(ids: [2, 3, 4])).setFailureType(to: MarvelError.self).eraseToAnyPublisher())
+        
+        sut.fetchInitialCharacters()
+        let itemsAfterInitialFetch = sut.characters.value
+        sut.willDisplayItemAt(1)
+        let itemsAfterDisplayItemAt = sut.characters.value
+        
+        XCTAssertNotEqual(itemsAfterInitialFetch, itemsAfterDisplayItemAt)
+    }
 }
 
 private extension HomeViewModelTests {
     func makeSUT(fetchUseCaseResult: AnyPublisher<[MarvelCharacter], MarvelError>,
-                 imageLoaderResult: AnyPublisher<UIImage, MarvelError> = Just(UIImage()).setFailureType(to: MarvelError.self).eraseToAnyPublisher()) -> HomeViewModel {
-        return HomeViewModelProvider(fetchCharactersUseCase: FetchCharacterUseCaseStub(result: fetchUseCaseResult),
+                 imageLoaderResult: AnyPublisher<UIImage, MarvelError> = Just(UIImage()).setFailureType(to: MarvelError.self).eraseToAnyPublisher(),
+                 nextLoadResult: AnyPublisher<[MarvelCharacter], MarvelError> = Just(anyMarvelCharacterList(ids: [3,4,5])).setFailureType(to: MarvelError.self).eraseToAnyPublisher()) -> HomeViewModel {
+        let fetchUseCase = FetchCharacterUseCaseStub(firstLoadResult: fetchUseCaseResult, nextLoadResult: nextLoadResult)
+        return HomeViewModelProvider(fetchCharactersUseCase: fetchUseCase,
                                      limitRequest: 20,
                                      imageLoader: ImageLoaderUseCaseStub(result: imageLoaderResult))
     }

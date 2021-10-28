@@ -8,25 +8,37 @@ import Combine
 import UIKit
 @testable import marvel_heroes
 
-func anyMarvelCharacterList() -> [MarvelCharacter] {
-    return [MarvelCharacter(id: 0, name: "", description: "", modified: "", thumbnail: Thumbnail(path: "", fileExtension: ""))]
+func anyMarvelCharacterList(ids: [Int] = [0]) -> [MarvelCharacter] {
+    return ids.map { id in
+        MarvelCharacter(id: id, name: "", description: "", modified: "", thumbnail: Thumbnail(path: "", fileExtension: ""))
+    }
 }
 
-struct FetchCharacterUseCaseStub: FetchCharacterUseCase {
-    private let result: AnyPublisher<[MarvelCharacter], MarvelError>
+class FetchCharacterUseCaseStub: FetchCharacterUseCase {
+    private let firstLoadResult: AnyPublisher<[MarvelCharacter], MarvelError>
+    private let nextLoadResult: AnyPublisher<[MarvelCharacter], MarvelError>
     private let delay: Double?
+    private var executeCount = 0
     
-    init(result: AnyPublisher<[MarvelCharacter], MarvelError>, delay: Double? = nil) {
-        self.result = result
+    init(firstLoadResult: AnyPublisher<[MarvelCharacter], MarvelError>,
+         delay: Double? = nil,
+         nextLoadResult: AnyPublisher<[MarvelCharacter], MarvelError> = Just(anyMarvelCharacterList(ids: [3,4,5])).setFailureType(to: MarvelError.self).eraseToAnyPublisher()) {
+        self.firstLoadResult = firstLoadResult
         self.delay = delay
+        self.nextLoadResult = nextLoadResult
     }
     
     func execute(limit: Int, offset: Int) -> AnyPublisher<[MarvelCharacter], MarvelError> {
+        guard executeCount == 0 else {
+            return nextLoadResult
+        }
+        
+        executeCount += 1
         guard let delay = delay else {
-            return result
+            return firstLoadResult
         }
 
-        return result.delay(for: RunLoop.SchedulerTimeType.Stride(delay), scheduler: RunLoop.main).eraseToAnyPublisher()
+        return firstLoadResult.delay(for: RunLoop.SchedulerTimeType.Stride(delay), scheduler: RunLoop.main).eraseToAnyPublisher()
     }
 }
 

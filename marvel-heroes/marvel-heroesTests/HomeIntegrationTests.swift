@@ -44,7 +44,7 @@ final class HomeIntegrationTests: XCTestCase {
 
 private extension HomeIntegrationTests {
     func makeSUT(initialResult: AnyPublisher<[MarvelCharacter], MarvelError>, delay: Double? = nil) -> HomeViewController {
-        let fetchCharacterUseCase = FetchCharacterUseCaseStub(result: initialResult, delay: delay)
+        let fetchCharacterUseCase = FetchCharacterUseCaseStub(firstLoadResult: initialResult, delay: delay)
         let viewModel = HomeViewModelProvider(fetchCharactersUseCase: fetchCharacterUseCase,
                                               limitRequest: 10,
                                               imageLoader: ImageLoaderUseCaseStub(result: Just(UIImage()).setFailureType(to: MarvelError.self).eraseToAnyPublisher()))

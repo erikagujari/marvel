@@ -12,6 +12,7 @@ protocol BaseViewModel {
 }
 
 protocol DetailViewModelProtocol: BaseViewModel {
+    var characterDetail: PassthroughSubject<CharacterDetail, Never> { get set }
     func fetchDetail()
 }
 
@@ -20,6 +21,7 @@ final class DetailViewModel {
     private let fetchUseCase: FetchCharacterDetailUseCase
     private var cancellables = Set<AnyCancellable>()
     var showSpinner = PassthroughSubject<Bool, Never>()
+    var characterDetail = PassthroughSubject<CharacterDetail, Never>()
     
     init(id: Int, fetchUseCase: FetchCharacterDetailUseCase) {
         self.id = id
@@ -33,8 +35,8 @@ extension DetailViewModel: DetailViewModelProtocol {
         fetchUseCase.execute(id: id)
             .sink { [weak self] result in
                 self?.showSpinner.send(false)
-            } receiveValue: { characterResponse in
-                print(characterResponse)
+            } receiveValue: { [weak self] character in
+                self?.characterDetail.send(character)
             }
             .store(in: &cancellables)
     }

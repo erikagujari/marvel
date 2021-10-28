@@ -7,7 +7,7 @@
 import Combine
 
 protocol FetchCharacterDetailUseCase {
-    func execute(id: Int) -> AnyPublisher<MarvelCharacterResponse, MarvelError>
+    func execute(id: Int) -> AnyPublisher<CharacterDetail, MarvelError>
 }
 
 struct FetchCharacterDetailUseCaseProvider: FetchCharacterDetailUseCase {
@@ -19,12 +19,12 @@ struct FetchCharacterDetailUseCaseProvider: FetchCharacterDetailUseCase {
         self.authorization = authorization
     }
     
-    func execute(id: Int) -> AnyPublisher<MarvelCharacterResponse, MarvelError> {
+    func execute(id: Int) -> AnyPublisher<CharacterDetail, MarvelError> {
         return authorization.execute()
             .flatMap { authorizationParameters in
                 return repository.fetchDetail(id: id, authorization: authorizationParameters)
-                    .map { response in
-                        return response.data.results[0]
+                    .compactMap { response in
+                        return CharacterDetail(from: response.data.results[0])
                     }
                     .eraseToAnyPublisher()
             }.eraseToAnyPublisher()

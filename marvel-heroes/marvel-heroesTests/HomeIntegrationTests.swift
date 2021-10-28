@@ -10,7 +10,7 @@ import XCTest
 
 final class HomeIntegrationTests: XCTestCase {
     func test_loadView_doesNotUpdateTableViewOnViewModelError() {
-        let sut = makeSUT(initialResult: Fail<[MarvelCharacter], MarvelError>(error: MarvelError.serviceError).eraseToAnyPublisher())
+        let (sut, _) = makeSUT(initialResult: Fail<[MarvelCharacter], MarvelError>(error: MarvelError.serviceError).eraseToAnyPublisher())
         
         sut.loadViewIfNeeded()
         
@@ -19,7 +19,7 @@ final class HomeIntegrationTests: XCTestCase {
     
     func test_loadView_updatesTableViewOnViewModelSuccess_andDoesNotShowSpinner() {
         let list = anyMarvelCharacterList()
-        let sut = makeSUT(initialResult: Just(list).setFailureType(to: MarvelError.self).eraseToAnyPublisher())
+        let (sut, _) = makeSUT(initialResult: Just(list).setFailureType(to: MarvelError.self).eraseToAnyPublisher())
         
         sut.loadViewIfNeeded()
         
@@ -29,7 +29,7 @@ final class HomeIntegrationTests: XCTestCase {
     
     func test_loadView_showsSpinnerOnDelay() {
         let list = anyMarvelCharacterList()
-        let sut = makeSUT(initialResult: Just(list).setFailureType(to: MarvelError.self).eraseToAnyPublisher(), delay: 1)
+        let (sut, _) = makeSUT(initialResult: Just(list).setFailureType(to: MarvelError.self).eraseToAnyPublisher(), delay: 1)
         let exp = expectation(description: "Waiting for showing spinner")
         sut.loadViewIfNeeded()
                 
@@ -40,18 +40,42 @@ final class HomeIntegrationTests: XCTestCase {
         
         wait(for: [exp], timeout: 1)
     }
+    
+    func test_loadView_showsErrorOnViewModelError() {
+        let (sut, router) = makeSUT(initialResult: Fail<[MarvelCharacter], MarvelError>(error: MarvelError.serviceError).eraseToAnyPublisher())
+        let exp = expectation(description: "Waiting to show error")
+        
+        router.showedErrorAction = {
+            exp.fulfill()
+        }
+        sut.loadViewIfNeeded()
+        
+        wait(for: [exp], timeout: 1.0)
+    }
 }
 
 private extension HomeIntegrationTests {
-    func makeSUT(initialResult: AnyPublisher<[MarvelCharacter], MarvelError>, delay: Double? = nil) -> HomeViewController {
+    func makeSUT(initialResult: AnyPublisher<[MarvelCharacter], MarvelError>, delay: Double? = nil) -> (HomeViewController, HomeRouterSpy) {
         let fetchCharacterUseCase = FetchCharacterUseCaseStub(firstLoadResult: initialResult, delay: delay)
-        let viewModel = HomeViewModelProvider(fetchCharactersUseCase: fetchCharacterUseCase,
+        let viewModel = HomeViewModel(fetchCharactersUseCase: fetchCharacterUseCase,
                                               limitRequest: 10,
                                               imageLoader: ImageLoaderUseCaseStub(result: Just(UIImage()).setFailureType(to: MarvelError.self).eraseToAnyPublisher()))
-        let viewController = HomeViewController(viewModel: viewModel)
+        let router = HomeRouterSpy()
+        let viewController = HomeViewController(viewModel: viewModel, router: router)
+        router.viewController = viewController
         trackForMemoryLeaks(instance: viewModel)
         trackForMemoryLeaks(instance: viewController)
+        trackForMemoryLeaks(instance: router)
         
-        return viewController
-    }        
+        return (viewController, router)
+    }
+    
+    class HomeRouterSpy: HomeRouterProtocol {
+        weak var viewController: UIViewController?
+        var showedErrorAction: (() -> Void)?
+        
+        func showError(title: String, message: String) {
+            showedErrorAction?()
+        }
+    }
 }

@@ -100,9 +100,9 @@ final class HomeViewModelTests: XCTestCase {
 private extension HomeViewModelTests {
     func makeSUT(fetchUseCaseResult: AnyPublisher<[MarvelCharacter], MarvelError>,
                  imageLoaderResult: AnyPublisher<UIImage, MarvelError> = Just(UIImage()).setFailureType(to: MarvelError.self).eraseToAnyPublisher(),
-                 nextLoadResult: AnyPublisher<[MarvelCharacter], MarvelError> = Just(anyMarvelCharacterList(ids: [3,4,5])).setFailureType(to: MarvelError.self).eraseToAnyPublisher()) -> HomeViewModel {
+                 nextLoadResult: AnyPublisher<[MarvelCharacter], MarvelError> = Just(anyMarvelCharacterList(ids: [3,4,5])).setFailureType(to: MarvelError.self).eraseToAnyPublisher()) -> HomeViewModelProtocol {
         let fetchUseCase = FetchCharacterUseCaseStub(firstLoadResult: fetchUseCaseResult, nextLoadResult: nextLoadResult)
-        return HomeViewModelProvider(fetchCharactersUseCase: fetchUseCase,
+        return HomeViewModel(fetchCharactersUseCase: fetchUseCase,
                                      limitRequest: 20,
                                      imageLoader: ImageLoaderUseCaseStub(result: imageLoaderResult))
     }

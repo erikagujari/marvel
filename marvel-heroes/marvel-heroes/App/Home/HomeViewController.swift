@@ -8,11 +8,13 @@ import Combine
 import UIKit
 
 final class HomeViewController: UITableViewController {
-    private let viewModel: HomeViewModel
+    private let viewModel: HomeViewModelProtocol
+    private let router: HomeRouterProtocol
     private var cancellables = Set<AnyCancellable>()
     
-    init(viewModel: HomeViewModel) {
+    init(viewModel: HomeViewModelProtocol, router: HomeRouterProtocol) {
         self.viewModel = viewModel
+        self.router = router
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -47,6 +49,13 @@ final class HomeViewController: UITableViewController {
             .sink(receiveValue: { [weak self] title in
                 self?.title = title
             })
+            .store(in: &cancellables)
+        
+        viewModel.showError
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] (title, message) in
+                self?.router.showError(title: title, message: message)
+            }
             .store(in: &cancellables)
     }
     

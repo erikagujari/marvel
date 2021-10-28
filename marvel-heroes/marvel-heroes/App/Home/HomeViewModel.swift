@@ -7,16 +7,17 @@
 import Combine
 import UIKit
 
-protocol HomeViewModel {
+protocol HomeViewModelProtocol {
     var characters: CurrentValueSubject<[MarvelCharacterModel], Never> { get set }
     var showSpinner: PassthroughSubject<Bool, Never> { get set }
+    var showError: PassthroughSubject<(String, String), Never> { get set }
     var title: CurrentValueSubject<String, Never> { get set }
     func fetchInitialCharacters()
     func cellModel(for index: Int, imageAction: @escaping (UIImage) -> Void) -> HomeCellModel
     func willDisplayItemAt(_ index: Int)
 }
 
-final class HomeViewModelProvider {
+final class HomeViewModel {
     private let fetchCharactersUseCase: FetchCharacterUseCase
     private let limitRequest: Int
     private let imageLoader: ImageLoaderUseCase
@@ -24,6 +25,7 @@ final class HomeViewModelProvider {
     private var cancellableImages = [AnyCancellable]()
     var characters = CurrentValueSubject<[MarvelCharacterModel], Never>([MarvelCharacterModel]())
     var showSpinner = PassthroughSubject<Bool, Never>()
+    var showError = PassthroughSubject<(String, String), Never>()
     var title = CurrentValueSubject<String, Never>("Heroes")
     
     init(fetchCharactersUseCase: FetchCharacterUseCase, limitRequest: Int, imageLoader: ImageLoaderUseCase) {
@@ -46,6 +48,9 @@ final class HomeViewModelProvider {
         showSpinner.send(true)
         fetchCharactersUseCase.execute(limit: limitRequest, offset: offset)
             .sink { [weak self] result in
+                if case let .failure(error) = result {
+                    self?.showError.send((Constants.errorTitle, error.description))
+                }
                 self?.showSpinner.send(false)
             } receiveValue: { [weak self] newCharacters in
                 guard let self = self else { return }
@@ -57,7 +62,7 @@ final class HomeViewModelProvider {
     }
 }
 
-extension HomeViewModelProvider: HomeViewModel {
+extension HomeViewModel: HomeViewModelProtocol {
     func fetchInitialCharacters() {
         loadCharacters(offset: 0)
     }
@@ -79,5 +84,11 @@ extension HomeViewModelProvider: HomeViewModel {
         guard let last = characters.last, characters[index] == last else { return }
         
         loadCharacters(offset: characters.count)
+    }
+}
+
+private extension HomeViewModel {
+    enum Constants {
+        static let errorTitle = "!Oops, we had an error!"
     }
 }

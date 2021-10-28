@@ -10,3 +10,16 @@ enum MarvelError: Error {
     case mappingError
     case apiKeyError
 }
+
+extension MarvelError: CustomStringConvertible {
+    var description: String {
+        switch self {
+        case .serviceError:
+            return "Sorry we had an error on service"
+        case .mappingError:
+            return "Sorry we cannot map your data successfully"
+        case .apiKeyError:
+            return "Sorry your app is not connected to Marvel API"
+        }
+    }
+}

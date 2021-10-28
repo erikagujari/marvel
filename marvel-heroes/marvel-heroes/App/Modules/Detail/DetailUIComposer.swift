@@ -12,9 +12,11 @@ final class DetailUIComposer {
     
     static func compose(id: Int) -> UIViewController {
         let router = DetailRouter()
-        let repository = CharacterRepositoryProvider(httpClient: URLSessionHTTPClient(session: .shared))
+        let client = URLSessionHTTPClient(session: .shared)
+        let repository = CharacterRepositoryProvider(httpClient: client)
         let useCase = FetchCharacterDetailUseCaseProvider(repository: repository, authorization: AuthorizedUseCaseProvider(bundle: .main))
-        let viewModel = DetailViewModel(id: id, fetchUseCase: useCase)
+        let imageLoader = ImageLoaderProvider(client: client, cache: NSCache())
+        let viewModel = DetailViewModel(id: id, fetchUseCase: useCase, imageLoader: imageLoader)
         let viewController = DetailViewController(viewModel: viewModel, router: router)
         router.viewController = viewController
         

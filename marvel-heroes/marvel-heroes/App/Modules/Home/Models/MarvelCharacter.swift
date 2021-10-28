@@ -18,12 +18,7 @@ struct MarvelCharacter: Equatable {
         
         self.id = id
         self.name = name
-        self.description = character.description
-        if let path = character.thumbnail.path,
-           let fileExtension = character.thumbnail.fileExtension {
-            imagePath = "\(path).\(fileExtension)"
-        } else {
-            imagePath = nil
-        }
+        description = character.description
+        imagePath = character.imagePath
     }
 }

@@ -20,6 +20,15 @@ struct MarvelCharacterResponse: Decodable {
     let modified: String?
     let thumbnail: ThumbnailResponse
     let comics: ComicsResponse?
+    
+    var imagePath: String? {
+        if let path = thumbnail.path,
+           let fileExtension = thumbnail.fileExtension {
+            return "\(path).\(fileExtension)"
+        } else {
+            return nil
+        }
+    }
 }
 
 struct ComicsResponse: Decodable {

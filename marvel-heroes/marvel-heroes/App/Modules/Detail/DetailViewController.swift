@@ -50,7 +50,7 @@ final class DetailViewController: UIViewController {
         self.viewModel = viewModel
         self.router = router
         super.init(nibName: nil, bundle: nil)
-    }    
+    }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
@@ -123,6 +123,13 @@ final class DetailViewController: UIViewController {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] character in
                 self?.setupContent(character: character)
+            }
+            .store(in: &cancellables)
+        
+        viewModel.loadedImage
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] image in
+                self?.imageView.image = image
             }
             .store(in: &cancellables)
     }

@@ -60,7 +60,14 @@ final class HomeViewController: UITableViewController {
     }
     
     private func setupTableView() {
+        refreshControl = UIRefreshControl()
+        refreshControl?.addTarget(self, action: #selector(refresh), for: .valueChanged)
         tableView.register(HomeCell.self, forCellReuseIdentifier: HomeCell.description())
+    }
+    
+    @objc private func refresh() {
+        viewModel.refresh()
+        refreshControl?.endRefreshing()
     }
 }
 

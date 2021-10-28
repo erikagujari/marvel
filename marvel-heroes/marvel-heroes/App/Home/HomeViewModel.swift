@@ -15,6 +15,7 @@ protocol HomeViewModelProtocol {
     func fetchInitialCharacters()
     func cellModel(for index: Int, imageAction: @escaping (UIImage) -> Void) -> HomeCellModel
     func willDisplayItemAt(_ index: Int)
+    func refresh()
 }
 
 final class HomeViewModel {
@@ -84,6 +85,10 @@ extension HomeViewModel: HomeViewModelProtocol {
         guard let last = characters.last, characters[index] == last else { return }
         
         loadCharacters(offset: characters.count)
+    }
+    
+    func refresh() {
+        loadCharacters(offset: characters.value.count)
     }
 }
 

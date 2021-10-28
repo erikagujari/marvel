@@ -52,6 +52,21 @@ final class HomeIntegrationTests: XCTestCase {
         
         wait(for: [exp], timeout: 1.0)
     }
+    
+    func test_selectRow_showsDetail() {
+        let list = anyMarvelCharacterList()
+        let (sut, router) = makeSUT(initialResult: Just(list).setFailureType(to: MarvelError.self).eraseToAnyPublisher())
+        let exp = expectation(description: "Waiting to show detail")
+        
+        router.showedDetailAction = {
+            exp.fulfill()
+        }
+        
+        sut.loadViewIfNeeded()
+        sut.tableView.delegate?.tableView?(sut.tableView, didSelectRowAt: IndexPath(row: 0, section: 0))
+        
+        wait(for: [exp], timeout: 1.0)
+    }
 }
 
 private extension HomeIntegrationTests {
@@ -73,9 +88,14 @@ private extension HomeIntegrationTests {
     class HomeRouterSpy: HomeRouterProtocol {
         weak var viewController: UIViewController?
         var showedErrorAction: (() -> Void)?
+        var showedDetailAction: (() -> Void)?
         
         func showError(title: String, message: String) {
             showedErrorAction?()
+        }
+        
+        func showDetail(id: Int) {
+            showedDetailAction?()
         }
     }
 }

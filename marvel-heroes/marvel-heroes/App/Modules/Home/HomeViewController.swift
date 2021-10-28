@@ -98,4 +98,8 @@ extension HomeViewController {
     override func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
         viewModel.willDisplayItemAt(indexPath.row)
     }
+    
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        router.showDetail(id: viewModel.idForRowAt(indexPath.row))
+    }
 }

@@ -9,6 +9,7 @@ import UIKit
 protocol HomeRouterProtocol {
     var viewController: UIViewController? { get set }
     func showError(title: String, message: String)
+    func showDetail(id: Int)
 }
 
 final class HomeRouter: HomeRouterProtocol {
@@ -26,5 +27,9 @@ final class HomeRouter: HomeRouterProtocol {
         }))
         
         viewController?.present(alertController, animated: true)
+    }
+    
+    func showDetail(id: Int) {
+        
     }
 }

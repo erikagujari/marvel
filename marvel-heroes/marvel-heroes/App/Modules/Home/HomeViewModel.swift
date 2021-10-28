@@ -16,6 +16,7 @@ protocol HomeViewModelProtocol {
     func cellModel(for index: Int, imageAction: @escaping (UIImage) -> Void) -> HomeCellModel
     func willDisplayItemAt(_ index: Int)
     func refresh()
+    func idForRowAt(_ index: Int) -> Int
 }
 
 final class HomeViewModel {
@@ -89,6 +90,10 @@ extension HomeViewModel: HomeViewModelProtocol {
     
     func refresh() {
         loadCharacters(offset: characters.value.count)
+    }
+    
+    func idForRowAt(_ index: Int) -> Int {
+        return characters.value[index].id
     }
 }
 

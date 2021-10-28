@@ -165,6 +165,22 @@
 			path = Views;
 			sourceTree = "<group>";
 		};
+		4075CE5E272AE0C500D4183B /* Modules */ = {
+			isa = PBXGroup;
+			children = (
+				4075CE5F272AE0CD00D4183B /* Detail */,
+				40FC7DB027242FCE002F2295 /* Home */,
+			);
+			path = Modules;
+			sourceTree = "<group>";
+		};
+		4075CE5F272AE0CD00D4183B /* Detail */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Detail;
+			sourceTree = "<group>";
+		};
 		40FC7D7327242D87002F2295 = {
 			isa = PBXGroup;
 			children = (
@@ -186,9 +202,9 @@
 		40FC7D7E27242D87002F2295 /* marvel-heroes */ = {
 			isa = PBXGroup;
 			children = (
-				4060CCB227255A5200323E50 /* Domain */,
-				40FC7DB32724823B002F2295 /* Data */,
 				40FC7DAF27242FAF002F2295 /* App */,
+				40FC7DB32724823B002F2295 /* Data */,
+				4060CCB227255A5200323E50 /* Domain */,
 				40FC7D7F27242D87002F2295 /* AppDelegate.swift */,
 				40FC7D8127242D87002F2295 /* SceneDelegate.swift */,
 				40FC7D8827242D89002F2295 /* Assets.xcassets */,
@@ -217,8 +233,8 @@
 		40FC7DAF27242FAF002F2295 /* App */ = {
 			isa = PBXGroup;
 			children = (
+				4075CE5E272AE0C500D4183B /* Modules */,
 				4017544A2726FFD300465F5E /* Extensions */,
-				40FC7DB027242FCE002F2295 /* Home */,
 				4075CE5D272A934B00D4183B /* Views */,
 			);
 			path = App;

@@ -44,14 +44,14 @@ final class HomeViewModelTests: XCTestCase {
         wait(for: [exp], timeout: 1.0)
     }
     
-    func test_cellModelDoesNotCallImageAction_onImageLoaderFailure() {
+    func test_cellModelCallsImageActionWithWifiImage_onImageLoaderFailure() {
         let sut = makeSUT(fetchUseCaseResult: Just(anyMarvelCharacterList()).setFailureType(to: MarvelError.self).eraseToAnyPublisher(),
                           imageLoaderResult: Fail(error: MarvelError.apiKeyError).eraseToAnyPublisher())
         let exp = expectation(description: "Waiting to load image on cell model")
-        exp.isInverted = true
         
         sut.fetchInitialCharacters()
         _ = sut.cellModel(for: 0) { loadedImage in
+            XCTAssertEqual(loadedImage.pngData(), UIImage(named: "wifi")?.pngData())
             exp.fulfill()
         }
         

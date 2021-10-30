@@ -11,6 +11,13 @@ struct CharacterDetail {
     let comics: [String]?
     let imagePath: String?
     
+    init(name: String, description: String?, comics: [String]?, imagePath: String?) {
+        self.name = name
+        self.description = description
+        self.comics = comics
+        self.imagePath = imagePath
+    }
+    
     init?(from response: MarvelCharacterResponse) {
         guard let name = response.name else { return nil }
         

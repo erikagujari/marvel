@@ -9,7 +9,6 @@ import UIKit
 
 protocol HomeViewModelProtocol: BaseViewModel {
     var characters: CurrentValueSubject<[MarvelCharacter], Never> { get set }
-    var showError: PassthroughSubject<(String, String), Never> { get set }
     var title: CurrentValueSubject<String, Never> { get set }
     func fetchInitialCharacters()
     func cellModel(for index: Int, imageAction: @escaping (UIImage) -> Void) -> HomeCellModel
@@ -24,10 +23,10 @@ final class HomeViewModel {
     private let imageLoader: ImageLoaderUseCase
     private var cancellables = Set<AnyCancellable>()
     private var cancellableImages = [AnyCancellable]()
-    var characters = CurrentValueSubject<[MarvelCharacter], Never>([MarvelCharacter]())
-    var showSpinner = PassthroughSubject<Bool, Never>()
-    var showError = PassthroughSubject<(String, String), Never>()
+    var characters = CurrentValueSubject<[MarvelCharacter], Never>([MarvelCharacter]())    
     var title = CurrentValueSubject<String, Never>("Heroes")
+    var showError = PassthroughSubject<(String, String), Never>()
+    var showSpinner = PassthroughSubject<Bool, Never>()
     
     init(fetchCharactersUseCase: FetchCharacterUseCase, limitRequest: Int, imageLoader: ImageLoaderUseCase) {
         self.fetchCharactersUseCase = fetchCharactersUseCase

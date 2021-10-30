@@ -13,7 +13,7 @@ final class DetailViewController: UIViewController {
     private let scrollView = UIScrollView()
     private let contentView = UIView()
     private var cancellables = Set<AnyCancellable>()
-    private lazy var imageView: UIImageView = {
+    private(set) lazy var imageView: UIImageView = {
         let imageView = UIImageView()
         NSLayoutConstraint.activate([
             imageView.heightAnchor.constraint(equalToConstant: view.frame.height / 3)
@@ -23,6 +23,7 @@ final class DetailViewController: UIViewController {
         imageView.showSpinner()
         return imageView
     }()
+    
     private lazy var mainStackView: UIStackView = {
         let stackView = UIStackView(arrangedSubviews: [imageView, titleLabel])
         stackView.axis = .vertical
@@ -31,14 +32,14 @@ final class DetailViewController: UIViewController {
         return stackView
     }()
     
-    private lazy var titleLabel: UILabel = {
+    private(set) lazy var titleLabel: UILabel = {
         let label = UILabel()
         label.font = UIFont.boldSystemFont(ofSize: 24)
         
         return label
     }()
     
-    private lazy var descriptionLabel: UILabel = {
+    private(set) lazy var descriptionLabel: UILabel = {
         let label = UILabel()
         label.numberOfLines = 0
         label.font = UIFont.italicSystemFont(ofSize: 16)
@@ -132,6 +133,13 @@ final class DetailViewController: UIViewController {
             .sink { [weak self] image in
                 self?.imageView.image = image
                 self?.imageView.dismissSpinner()
+            }
+            .store(in: &cancellables)
+        
+        viewModel.showError
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] (title, message) in
+                self?.router.showError(title: title, message: message)
             }
             .store(in: &cancellables)
     }

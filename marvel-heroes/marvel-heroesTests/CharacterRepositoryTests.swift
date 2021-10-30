@@ -12,13 +12,15 @@ final class CharacterRepositoryTests: XCTestCase {
     func test_fetchReturnsServiceError_onNilHTTPResponse() {
         let sut = makeSUT(data: nil, urlResponse: nil, error: nil)
         
-        expect(sut: sut, endsWithResult: .failure(.serviceError))
+        expectFetchList(sut: sut, endsWithResult: .failure(.serviceError))
+        expectFetchDetail(sut: sut, endsWithResult: .failure(.serviceError))
     }
     
     func test_fetchReturnsServiceError_onNotHTTPURLResponse() {
         let sut = makeSUT(data: nil, urlResponse: URLResponse(), error: nil)
         
-        expect(sut: sut, endsWithResult: .failure(.serviceError))
+        expectFetchList(sut: sut, endsWithResult: .failure(.serviceError))
+        expectFetchDetail(sut: sut, endsWithResult: .failure(.serviceError))
     }
     
     func test_fetchReturnsServiceError_on199StatusCode() {
@@ -28,7 +30,8 @@ final class CharacterRepositoryTests: XCTestCase {
                                           headerFields: nil)
         let sut = makeSUT(data: nil, urlResponse: urlResponse, error: nil)
         
-        expect(sut: sut, endsWithResult: .failure(.serviceError))
+        expectFetchList(sut: sut, endsWithResult: .failure(.serviceError))
+        expectFetchDetail(sut: sut, endsWithResult: .failure(.serviceError))
     }
     
     func test_fetchReturnsServiceError_on300StatusCode() {
@@ -38,7 +41,8 @@ final class CharacterRepositoryTests: XCTestCase {
                                           headerFields: nil)
         let sut = makeSUT(data: nil, urlResponse: urlResponse, error: nil)
         
-        expect(sut: sut, endsWithResult: .failure(.serviceError))
+        expectFetchList(sut: sut, endsWithResult: .failure(.serviceError))
+        expectFetchDetail(sut: sut, endsWithResult: .failure(.serviceError))
     }
     
     func test_fetchReturnsMappingError_onNilData() {
@@ -48,7 +52,8 @@ final class CharacterRepositoryTests: XCTestCase {
                                           headerFields: nil)
         let sut = makeSUT(data: nil, urlResponse: urlResponse, error: nil)
         
-        expect(sut: sut, endsWithResult: .failure(.mappingError))
+        expectFetchList(sut: sut, endsWithResult: .failure(.mappingError))
+        expectFetchDetail(sut: sut, endsWithResult: .failure(.mappingError))
     }
     
     func test_fetchReturnsMappingError_onEmptyData() {
@@ -59,7 +64,8 @@ final class CharacterRepositoryTests: XCTestCase {
                                           headerFields: nil)
         let sut = makeSUT(data: data, urlResponse: urlResponse, error: nil)
         
-        expect(sut: sut, endsWithResult: .failure(.mappingError))
+        expectFetchList(sut: sut, endsWithResult: .failure(.mappingError))
+        expectFetchDetail(sut: sut, endsWithResult: .failure(.mappingError))
     }
     
     func test_fetchReturnsMappingError_onInvalidData() {
@@ -69,7 +75,8 @@ final class CharacterRepositoryTests: XCTestCase {
                                           headerFields: nil)
         let sut = makeSUT(data: anyInvalidJSON(), urlResponse: urlResponse, error: nil)
         
-        expect(sut: sut, endsWithResult: .failure(.mappingError))
+        expectFetchList(sut: sut, endsWithResult: .failure(.mappingError))
+        expectFetchDetail(sut: sut, endsWithResult: .failure(.mappingError))
     }
     
     func test_fetchReturnsCharacters_onValidData() {
@@ -77,9 +84,10 @@ final class CharacterRepositoryTests: XCTestCase {
                                           statusCode: 200,
                                           httpVersion: nil,
                                           headerFields: nil)
-        let sut = makeSUT(data: anyValidJSON(), urlResponse: urlResponse, error: nil)
+        let sut = makeSUT(data: anyValidCharactersListJSON(), urlResponse: urlResponse, error: nil)
         
-        expect(sut: sut, endsWithResult: .finished)
+        expectFetchList(sut: sut, endsWithResult: .finished)
+        expectFetchDetail(sut: sut, endsWithResult: .finished)
     }
     
     func test_fetchReturnsServiceError_onAnyError() {
@@ -87,9 +95,10 @@ final class CharacterRepositoryTests: XCTestCase {
                                           statusCode: 200,
                                           httpVersion: nil,
                                           headerFields: nil)
-        let sut = makeSUT(data: anyValidJSON(), urlResponse: urlResponse, error: MarvelError.mappingError)
+        let sut = makeSUT(data: anyValidCharactersListJSON(), urlResponse: urlResponse, error: MarvelError.mappingError)
         
-        expect(sut: sut, endsWithResult: .failure(.serviceError))
+        expectFetchList(sut: sut, endsWithResult: .failure(.serviceError))
+        expectFetchDetail(sut: sut, endsWithResult: .failure(.serviceError))
     }
 }
 
@@ -104,7 +113,7 @@ private extension CharacterRepositoryTests {
         return CharacterRepositoryProvider(httpClient: URLSessionHTTPClient(session: URLSession(configuration: configuration)))
     }
     
-    func expect(sut: CharacterRepository, endsWithResult expectedResult: Subscribers.Completion<MarvelError>, file: StaticString = #filePath, line: UInt = #line) {
+    func expectFetchList(sut: CharacterRepository, endsWithResult expectedResult: Subscribers.Completion<MarvelError>, file: StaticString = #filePath, line: UInt = #line) {
         let exp = expectation(description: "Waiting to complete fetch")
         var cancellables = Set<AnyCancellable>()
                 
@@ -115,6 +124,20 @@ private extension CharacterRepositoryTests {
             } receiveValue: { characters in
                 XCTAssertFalse(characters.isEmpty)
             }
+            .store(in: &cancellables)
+        
+        wait(for: [exp], timeout: 2)
+    }
+    
+    func expectFetchDetail(sut: CharacterRepository, endsWithResult expectedResult: Subscribers.Completion<MarvelError>, file: StaticString = #filePath, line: UInt = #line) {
+        let exp = expectation(description: "Waiting to complete fetch")
+        var cancellables = Set<AnyCancellable>()
+        
+        sut.fetchDetail(id: 0, authorization: CharacterService.AuthorizationParameters(apiKey: "", timestamp: "", hash: ""))
+            .sink { receivedResult in
+                XCTAssertEqual(expectedResult, receivedResult, file: file, line: line)
+                exp.fulfill()
+            } receiveValue: { _ in }
             .store(in: &cancellables)
         
         wait(for: [exp], timeout: 2)

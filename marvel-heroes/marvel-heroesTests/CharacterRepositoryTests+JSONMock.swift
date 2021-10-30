@@ -22,7 +22,7 @@ extension CharacterRepositoryTests {
         return json.data(using: .utf8)
     }
     
-    func anyValidJSON() -> Data? {
+    func anyValidCharactersListJSON() -> Data? {
         let json = """
     {
       "data": {
@@ -257,3 +257,4 @@ extension CharacterRepositoryTests {
         return json.data(using: .utf8)
     }
 }
+

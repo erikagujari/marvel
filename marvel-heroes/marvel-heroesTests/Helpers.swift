@@ -49,3 +49,35 @@ struct ImageLoaderUseCaseStub: ImageLoaderUseCase {
         return result
     }
 }
+
+struct CharacterRepositoryStub: CharacterRepository {
+    let listResult: AnyPublisher<[MarvelCharacterResponse], MarvelError>
+    let detailResult: AnyPublisher<CharacterDetailResponse, MarvelError>
+    
+    func fetchDetail(id: Int, authorization: CharacterService.AuthorizationParameters) -> AnyPublisher<CharacterDetailResponse, MarvelError> {
+        return detailResult
+    }
+    
+    func fetch(parameters: CharacterService.ListParameters, authorization: CharacterService.AuthorizationParameters) -> AnyPublisher<[MarvelCharacterResponse], MarvelError> {
+        return listResult
+    }
+}
+
+class TestBundle: Bundle {
+    private let dictionary: [String: Any]
+    
+    init(dictionary: [String: Any]) {
+        self.dictionary = dictionary
+        
+        super.init()
+    }
+    
+    override func object(forInfoDictionaryKey key: String) -> Any? {
+        return dictionary[key]
+    }
+}
+
+func anyValidBundleDictionary() -> [String: Any] {
+    return ["API_PUBLIC_KEY": "",
+            "API_PRIVATE_KEY": ""]
+}

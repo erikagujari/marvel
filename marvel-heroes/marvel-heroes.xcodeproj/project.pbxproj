@@ -34,6 +34,7 @@
 		4075CE70272B02CA00D4183B /* CharacterDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4075CE6F272B02CA00D4183B /* CharacterDetail.swift */; };
 		408B0C30272D35F100F35AD7 /* DetailIntegrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408B0C2F272D35F100F35AD7 /* DetailIntegrationTests.swift */; };
 		408B0C33272D50D600F35AD7 /* BaseViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408B0C32272D50D600F35AD7 /* BaseViewModel.swift */; };
+		408B0C35272D58F700F35AD7 /* FetchCharacterDetailUseCaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408B0C34272D58F700F35AD7 /* FetchCharacterDetailUseCaseTests.swift */; };
 		40E2090B272986CB004A25C0 /* ImageService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40E2090A272986CB004A25C0 /* ImageService.swift */; };
 		40E2090D27299686004A25C0 /* ImageLoaderUseCaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40E2090C27299686004A25C0 /* ImageLoaderUseCaseTests.swift */; };
 		40FC7D8027242D87002F2295 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FC7D7F27242D87002F2295 /* AppDelegate.swift */; };
@@ -88,6 +89,7 @@
 		4075CE6F272B02CA00D4183B /* CharacterDetail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CharacterDetail.swift; sourceTree = "<group>"; };
 		408B0C2F272D35F100F35AD7 /* DetailIntegrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailIntegrationTests.swift; sourceTree = "<group>"; };
 		408B0C32272D50D600F35AD7 /* BaseViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseViewModel.swift; sourceTree = "<group>"; };
+		408B0C34272D58F700F35AD7 /* FetchCharacterDetailUseCaseTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FetchCharacterDetailUseCaseTests.swift; sourceTree = "<group>"; };
 		40E2090A272986CB004A25C0 /* ImageService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageService.swift; sourceTree = "<group>"; };
 		40E2090C27299686004A25C0 /* ImageLoaderUseCaseTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageLoaderUseCaseTests.swift; sourceTree = "<group>"; };
 		40FC7D7C27242D87002F2295 /* marvel-heroes.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "marvel-heroes.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -271,6 +273,7 @@
 				40E2090C27299686004A25C0 /* ImageLoaderUseCaseTests.swift */,
 				4060A0D92727DF1200966216 /* XCTestCase+MemoryLeakTracking.swift */,
 				408B0C2F272D35F100F35AD7 /* DetailIntegrationTests.swift */,
+				408B0C34272D58F700F35AD7 /* FetchCharacterDetailUseCaseTests.swift */,
 			);
 			path = "marvel-heroesTests";
 			sourceTree = "<group>";
@@ -485,6 +488,7 @@
 				40FC7DBC27248445002F2295 /* CharacterRepositoryTests.swift in Sources */,
 				4060A0D82727D53500966216 /* HomeIntegrationTests.swift in Sources */,
 				408B0C30272D35F100F35AD7 /* DetailIntegrationTests.swift in Sources */,
+				408B0C35272D58F700F35AD7 /* FetchCharacterDetailUseCaseTests.swift in Sources */,
 				4060CCAF272550EB00323E50 /* CharacterRepositoryTests+JSONMock.swift in Sources */,
 				4060A0DA2727DF1200966216 /* XCTestCase+MemoryLeakTracking.swift in Sources */,
 				4060CCB12725556A00323E50 /* FetchCharactersUseCaseTests.swift in Sources */,

@@ -67,7 +67,9 @@ final class FetchCharacterUseCaseTests: XCTestCase {
 
 private extension FetchCharacterUseCaseTests {
     func makeSUT(result: AnyPublisher<[MarvelCharacterResponse], MarvelError>, dictionary: [String: Any]? = nil) -> FetchCharacterUseCase {
-        return FetchCharacterUseCaseProvider(repository: CharacterRepositoryStub(result: result),
+        let repository = CharacterRepositoryStub(listResult: result,
+                                                 detailResult: Fail(error: MarvelError.serviceError).eraseToAnyPublisher())
+        return FetchCharacterUseCaseProvider(repository: repository,
                                              authorization: AuthorizedUseCaseProvider(bundle: TestBundle(dictionary: dictionary ?? anyValidBundleDictionary())))
     }
     
@@ -85,40 +87,5 @@ private extension FetchCharacterUseCaseTests {
             .store(in: &cancellables)
         
         wait(for: [exp], timeout: 0.1)
-    }
-    
-    struct CharacterRepositoryStub: CharacterRepository {
-        private let result: AnyPublisher<[MarvelCharacterResponse], MarvelError>
-        
-        init(result: AnyPublisher<[MarvelCharacterResponse], MarvelError>) {
-            self.result = result
-        }
-        
-        func fetchDetail(id: Int, authorization: CharacterService.AuthorizationParameters) -> AnyPublisher<CharacterDetailResponse, MarvelError> {
-            return Fail(error: MarvelError.serviceError).eraseToAnyPublisher()
-        }
-        
-        func fetch(parameters: CharacterService.ListParameters, authorization: CharacterService.AuthorizationParameters) -> AnyPublisher<[MarvelCharacterResponse], MarvelError> {
-            return result
-        }
-    }
-    
-    class TestBundle: Bundle {
-        private let dictionary: [String: Any]
-        
-        init(dictionary: [String: Any]) {
-            self.dictionary = dictionary
-            
-            super.init()
-        }
-        
-        override func object(forInfoDictionaryKey key: String) -> Any? {
-            return dictionary[key]
-        }
-    }
-    
-    func anyValidBundleDictionary() -> [String: Any] {
-        return ["API_PUBLIC_KEY": "",
-                "API_PRIVATE_KEY": ""]
-    }
+    }                        
 }

@@ -19,7 +19,7 @@ struct FetchCharacterDetailUseCaseProvider: FetchCharacterDetailUseCase {
         self.authorization = authorization
     }
     
-    func execute(id: Int) -> AnyPublisher<CharacterDetail, MarvelError> {
+    func execute(id: Int) -> AnyPublisher<CharacterDetail, MarvelError> {        
         return authorization.execute()
             .flatMap { authorizationParameters in
                 return repository.fetchDetail(id: id, authorization: authorizationParameters)

@@ -105,6 +105,7 @@ final class DetailViewController: UIViewController {
                 let label = UILabel()
                 label.font = UIFont.systemFont(ofSize: 14)
                 label.text = comic
+                label.numberOfLines = 0
                 stackView.addArrangedSubview(label)
             }
             mainStackView.addArrangedSubview(stackView)
@@ -130,6 +131,7 @@ final class DetailViewController: UIViewController {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] image in
                 self?.imageView.image = image
+                self?.imageView.dismissSpinner()
             }
             .store(in: &cancellables)
     }

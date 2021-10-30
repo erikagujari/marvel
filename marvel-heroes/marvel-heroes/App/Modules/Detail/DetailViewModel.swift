@@ -38,8 +38,9 @@ final class DetailViewModel {
 
         imageLoader.fetch(from: path)
             .sink { result in
-                if case let .failure = result {
-                    //TODO: stop animating and put placeholder into uiimage
+                if case .failure = result,
+                   let image = UIImage(named: "wifi") {
+                    self.loadedImage.send(image)
                 }
             } receiveValue: { [weak self] image in
                 self?.loadedImage.send(image)

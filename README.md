@@ -1,16 +1,14 @@
-#Marvel Heroes App
-
-## This app intends to fetch a list of heroes and a detail of each of them.
+# Marvel Heroes App: this app intends to fetch a list of heroes and a detail of each of them.
 
 
-### Architecture Details: 
+## Architecture Details: 
 * Folder's distribution is: App(UI), Domain(UseCases), Data(Repositories and Network layer)
 * UI design pattern used is MVVM+Router for a basic communication between ViewController (UIKit based), ViewModel and a Router.
 * Usage of Combine framework to handle network requests and bindings to accomplish MVVM design pattern.
 * App Transport Security Settings admits arbitrary loads to download properly images from Marvel. In case of centralizing its domain we could just add this specific case.
 * There is a basic NSCache usage for image retrieval. Once fetching an image from a url path it is cached for future retrievals.
 
-### UI Details:
+## UI Details:
 * **Home** contains a UITableView which displays cells containing each character received from Network. There is no Cache System for failure case at the moment, later on a CoreData cache based will be implemented.
 * Once getting to the last item displayed on the table, more items are fetched and later on displayed.
 * Cells displayed on home contain an image, a title and a description. Once clicking into one of them a detail is shown.

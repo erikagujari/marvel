@@ -38,7 +38,12 @@ final class HomeViewModel {
     private func assignImageFrom(path: String, to imageAction: @escaping (UIImage) -> Void) {
         imageLoader.fetch(from: path)
             .receive(on: RunLoop.main)
-            .sink { _ in }
+            .sink { result in
+                if case .failure = result,
+                   let image = UIImage(named: "wifi") {
+                    imageAction(image)
+                }
+            }
             receiveValue: { image in
                 imageAction(image)
             }

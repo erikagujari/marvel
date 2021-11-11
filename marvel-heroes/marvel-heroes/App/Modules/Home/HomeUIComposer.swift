@@ -5,13 +5,15 @@
 //  Created by Erik Agujari on 25/10/21.
 //
 
+import CoreData
 import UIKit
 
 final class HomeUIComposer {
     private init() {}
     
     static func compose(limitRequest: Int) -> UIViewController {
-        let imageLoader = ImageLoaderProvider(client: URLSessionHTTPClient(session: .shared), cache: NSCache())
+        let cache = try! CoreDataFeedStore(localURL: NSPersistentContainer.defaultDirectoryURL().appendingPathComponent("feed-store.sqlite"))
+        let imageLoader = ImageLoaderProvider(client: URLSessionHTTPClient(session: .shared), cache: cache)
         let useCase = FetchCharacterUseCaseProvider(repository: CharacterRepositoryProvider(httpClient: URLSessionHTTPClient(session: .shared)),
                                                     authorization: AuthorizedUseCaseProvider(bundle: .main))
         let viewModel = HomeViewModel(fetchCharactersUseCase: useCase,

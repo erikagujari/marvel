@@ -6,7 +6,7 @@
 * UI design pattern used is MVVM+Router for a basic communication between ViewController (UIKit based), ViewModel and a Router.
 * Usage of Combine framework to handle network requests and bindings to accomplish MVVM design pattern.
 * App Transport Security Settings admits arbitrary loads to download properly images from Marvel. In case of centralizing its domain we could just add this specific case.
-* There is a basic NSCache usage for image retrieval. Once fetching an image from a url path it is cached for future retrievals.
+* There is a basic CoreData usage for cached image retrieval. Once fetching an image from a url path it is cached for future retrievals.
 
 ## UI Details:
 * **Home** contains a UITableView which displays cells containing each character received from Network. There is no Cache System for failure case at the moment, later on a CoreData cache based will be implemented.

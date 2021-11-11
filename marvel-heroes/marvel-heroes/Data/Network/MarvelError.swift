@@ -9,6 +9,7 @@ enum MarvelError: Error {
     case serviceError
     case mappingError
     case apiKeyError
+    case cacheError
 }
 
 extension MarvelError: CustomStringConvertible {
@@ -20,6 +21,8 @@ extension MarvelError: CustomStringConvertible {
             return "Sorry we cannot map your data successfully"
         case .apiKeyError:
             return "Sorry your app is not connected to Marvel API"
+        case .cacheError:
+            return "Sorry your cache is bad"
         }
     }
 }

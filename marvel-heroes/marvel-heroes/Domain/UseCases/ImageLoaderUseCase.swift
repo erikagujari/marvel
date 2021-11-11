@@ -14,26 +14,58 @@ protocol ImageLoaderUseCase {
 
 final class ImageLoaderProvider: ImageLoaderUseCase {
     private let client: HTTPClient
-    private let cache: NSCache<NSString, UIImage>
+    private let cache: ImageDataStore
     
-    init(client: HTTPClient, cache: NSCache<NSString, UIImage>) {
+    init(client: HTTPClient, cache: ImageDataStore) {
         self.client = client
         self.cache = cache
     }
     
-    func fetch(from path: String) -> AnyPublisher<UIImage, MarvelError> {
-        guard let cachedImage = cache.object(forKey: path as NSString) else {
-            return client.fetch(request: ImageService.load(path))
-                .flatMap { [weak self] data -> AnyPublisher<UIImage, MarvelError> in
-                    guard let image = UIImage(data: data) else {
-                        return Fail<UIImage, MarvelError>(error: MarvelError.serviceError).eraseToAnyPublisher()
+    private func fetchCachedImage(for path: String) -> AnyPublisher<Data, MarvelError> {
+        return Deferred {
+            Future<Data, MarvelError> { [weak self] future in
+                self?.cache.retrieve(dataForPath: path, completion: { result in
+                    switch result {
+                    case .failure:
+                        future(.failure(MarvelError.cacheError))
+                    case let .success(data):
+                        guard let data = data else {
+                            future(.failure(MarvelError.cacheError))
+                            return
+                        }
+                        future(.success(data))
                     }
-                    
-                    self?.cache.setObject(image, forKey: path as NSString)
-                    return Just(image).setFailureType(to: MarvelError.self).eraseToAnyPublisher()
-                }.eraseToAnyPublisher()
+                })
+            }
+        }.eraseToAnyPublisher()
+    }
+    
+    private func storeImage(data: Data, path: String) -> AnyPublisher<UIImage, MarvelError> {
+        guard let image = UIImage(data: data) else {
+            return Fail(error: MarvelError.serviceError).eraseToAnyPublisher()
         }
         
-        return Just(cachedImage).setFailureType(to: MarvelError.self).eraseToAnyPublisher()
+        return Deferred {
+            Future<UIImage, MarvelError> { [weak self] future in
+                self?.cache.insert(data, for: path, completion: { result in
+                    switch result {
+                    case .failure:
+                        future(.failure(MarvelError.cacheError))
+                    case .success:
+                        future(.success(image))
+                    }
+                })
+            }
+        }.eraseToAnyPublisher()
+    }
+    
+    func fetch(from path: String) -> AnyPublisher<UIImage, MarvelError> {
+        fetchCachedImage(for: path)
+            .catch { [weak self] _ in
+                return self?.client.fetch(request: ImageService.load(path)) ?? Fail(error: MarvelError.serviceError).eraseToAnyPublisher()
+            }
+            .flatMap { [weak self] data -> AnyPublisher<UIImage, MarvelError> in
+                return self?.storeImage(data: data, path: path) ?? Fail(error: MarvelError.serviceError).eraseToAnyPublisher()
+            }.eraseToAnyPublisher()
     }
 }

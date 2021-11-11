@@ -13,15 +13,19 @@ final class ImageLoaderUseCaseTests: XCTestCase {
     func test_fetchReturnsCachedImage_onValidCache() {
         let path = "any-path"
         let cachedImage = UIImage(systemName: "star")!
-        let sut = makeSUT(path: path, cachedImage: cachedImage)
+        let sut = makeSUT(path: path, cachedImageData: cachedImage.pngData())
         let exp = expectation(description: "Waiting to load image")
         var cancellables = Set<AnyCancellable>()
         
         sut.fetch(from: path)
             .sink { result in
+                if case .failure = result {
+                    XCTFail("It should have succeed with an image")
+                }
                 exp.fulfill()
             } receiveValue: { image in
-                XCTAssertEqual(image, cachedImage)
+                let transformedImage = UIImage(data: cachedImage.pngData()!)!
+                XCTAssertEqual(image.pngData(), transformedImage.pngData())
             }
             .store(in: &cancellables)
         
@@ -98,11 +102,11 @@ final class ImageLoaderUseCaseTests: XCTestCase {
 }
 
 private extension ImageLoaderUseCaseTests {
-    func makeSUT(path: String, httpClientResult: AnyPublisher<Data, MarvelError> = Just(Data()).setFailureType(to: MarvelError.self).eraseToAnyPublisher(), cachedImage: UIImage? = nil) -> ImageLoaderUseCase {
-        let cache = CacheSpy()
-        cache.removeAllObjects()
-        if let cachedImage = cachedImage {
-            cache.setObject(cachedImage, forKey: path as NSString)
+    func makeSUT(path: String, httpClientResult: AnyPublisher<Data, MarvelError> = Just(Data()).setFailureType(to: MarvelError.self).eraseToAnyPublisher(), cachedImageData: Data? = nil) -> ImageLoaderUseCase {
+        deleteStoreArtifacts()
+        let cache = try! CoreDataFeedStore(localURL: testSpecificStoreURL())
+        if let cachedImageData = cachedImageData {
+            cache.insert(cachedImageData, for: path, completion: { _ in })
         }
         let sut = ImageLoaderProvider(client: HTTPClientStub(result: httpClientResult),
                                       cache: cache)
@@ -123,8 +127,15 @@ private extension ImageLoaderUseCaseTests {
         }
     }
     
-    class CacheSpy: NSCache<NSString, UIImage> {
-        
+    private func deleteStoreArtifacts() {
+        try? FileManager.default.removeItem(at: testSpecificStoreURL())
+    }
+    
+    private func testSpecificStoreURL() -> URL {
+        return cachesDirectory().appendingPathComponent("\(type(of: self)).store")
+    }
+    
+    private func cachesDirectory() -> URL {
+        return FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first!
     }
 }
-

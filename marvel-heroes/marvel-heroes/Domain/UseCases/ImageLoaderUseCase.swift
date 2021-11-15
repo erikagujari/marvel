@@ -40,19 +40,23 @@ final class ImageLoaderProvider: ImageLoaderUseCase {
         }.eraseToAnyPublisher()
     }
     
-    private func storeImage(data: Data, path: String) -> AnyPublisher<UIImage, MarvelError> {
-        guard let image = UIImage(data: data) else {
-            return Fail(error: MarvelError.serviceError).eraseToAnyPublisher()
-        }
-        
+    private func fetchNetworkImage(for path: String) -> AnyPublisher<Data, MarvelError> {
+        return client.fetch(request: ImageService.load(path))
+            .flatMap { [weak self] data in
+                self?.storeImage(data: data, path: path) ?? Fail(error: MarvelError.serviceError).eraseToAnyPublisher()
+            }
+            .eraseToAnyPublisher()
+    }
+    
+    private func storeImage(data: Data, path: String) -> AnyPublisher<Data, MarvelError> {
         return Deferred {
-            Future<UIImage, MarvelError> { [weak self] future in
+            Future<Data, MarvelError> { [weak self] future in
                 self?.cache.insert(data, for: path, completion: { result in
                     switch result {
                     case .failure:
                         future(.failure(MarvelError.cacheError))
                     case .success:
-                        future(.success(image))
+                        future(.success(data))
                     }
                 })
             }
@@ -62,10 +66,13 @@ final class ImageLoaderProvider: ImageLoaderUseCase {
     func fetch(from path: String) -> AnyPublisher<UIImage, MarvelError> {
         fetchCachedImage(for: path)
             .catch { [weak self] _ in
-                return self?.client.fetch(request: ImageService.load(path)) ?? Fail(error: MarvelError.serviceError).eraseToAnyPublisher()
+                return self?.fetchNetworkImage(for: path) ?? Fail(error: MarvelError.serviceError).eraseToAnyPublisher()
             }
-            .flatMap { [weak self] data -> AnyPublisher<UIImage, MarvelError> in
-                return self?.storeImage(data: data, path: path) ?? Fail(error: MarvelError.serviceError).eraseToAnyPublisher()
+            .flatMap { data -> AnyPublisher<UIImage, MarvelError> in
+                guard let image = UIImage(data: data) else {
+                    return Fail(error: MarvelError.serviceError).eraseToAnyPublisher()
+                }
+                return Just(image).setFailureType(to: MarvelError.self).eraseToAnyPublisher()
             }.eraseToAnyPublisher()
     }
 }

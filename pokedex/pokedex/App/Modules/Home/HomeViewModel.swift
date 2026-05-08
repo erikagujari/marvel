@@ -96,6 +96,7 @@ final class HomeViewModel: HomeViewModelProtocol {
     }
 
     private func loadCharacters(offset: Int) async {
+        guard !isLoading else { return }
         isLoading = true
         defer { isLoading = false }
         do {

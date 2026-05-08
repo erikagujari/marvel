@@ -91,3 +91,6 @@ iOSInjectionProject/
 
 # Config
 *.xcconfig
+
+# macOS
+.DS_Store

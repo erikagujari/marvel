@@ -24,8 +24,8 @@ There is the existence of the unit tests and integration tests, the latter in fa
 
 
 ## Stack:
-* Xcode 13
-* iOS 15
+* Xcode 26
+* iOS 17
 
 ### API: [PokéAPI](https://pokeapi.co/docs/v2)
 

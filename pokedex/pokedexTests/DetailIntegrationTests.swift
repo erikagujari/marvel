@@ -9,6 +9,7 @@ import Combine
 @testable import pokedex
 import XCTest
 
+@MainActor
 final class DetailIntegrationTests: XCTestCase {
     func test_loadView_showsSpinnerOnImageView() {
         let (sut, _) = makeSUT(detailResult: Just(anyPokemonDetail()).setFailureType(to: APIError.self).eraseToAnyPublisher(),
@@ -23,19 +24,11 @@ final class DetailIntegrationTests: XCTestCase {
         let imageResult = Just(UIImage()).setFailureType(to: APIError.self).eraseToAnyPublisher()
         let (sut, _) = makeSUT(detailResult: Just(anyPokemonDetail()).setFailureType(to: APIError.self).eraseToAnyPublisher(),
                                imageResult: imageResult)
-        let exp = expectation(description: "Waiting to complete image")
-        var cancellabes = Set<AnyCancellable>()
 
         sut.loadViewIfNeeded()
+        RunLoop.main.run(until: Date(timeIntervalSinceNow: 0.1))
 
-        imageResult
-            .receive(on: DispatchQueue.main)
-            .sink { _ in
-                XCTAssertNil(sut.imageView.subviews.first(where: { $0 is Spinner }))
-                exp.fulfill()
-            } receiveValue: { _ in }.store(in: &cancellabes)
-
-        wait(for: [exp], timeout: 1.0)
+        XCTAssertNil(sut.imageView.subviews.first(where: { $0 is Spinner }))
     }
 
     func test_loadView_updatesUIOnUseCaseCompletion() {
@@ -43,40 +36,23 @@ final class DetailIntegrationTests: XCTestCase {
         let detailResult = Just(detail).setFailureType(to: APIError.self).eraseToAnyPublisher()
         let (sut, _) = makeSUT(detailResult: detailResult,
                                imageResult: Just(UIImage()).setFailureType(to: APIError.self).eraseToAnyPublisher())
-        let exp = expectation(description: "Waiting to complete pokemon detail")
-        var cancellabes = Set<AnyCancellable>()
 
         sut.loadViewIfNeeded()
+        RunLoop.main.run(until: Date(timeIntervalSinceNow: 0.1))
 
-        detailResult
-            .receive(on: DispatchQueue.main)
-            .sink { _ in
-                XCTAssertEqual(sut.titleLabel.text, detail.name)
-                XCTAssertEqual(sut.descriptionLabel.text, detail.description)
-                exp.fulfill()
-            } receiveValue: { _ in }
-            .store(in: &cancellabes)
-
-        wait(for: [exp], timeout: 1.0)
+        XCTAssertEqual(sut.titleLabel.text, detail.name)
+        XCTAssertEqual(sut.descriptionLabel.text, detail.description)
     }
 
     func test_loadView_showsErrorOnUseCaseError() {
         let detailResult = Fail<PokemonDetail, APIError>(error: APIError.serviceError).eraseToAnyPublisher()
         let (viewController, router) = makeSUT(detailResult: detailResult,
                                                imageResult: Just(UIImage()).setFailureType(to: APIError.self).eraseToAnyPublisher())
-        let exp = expectation(description: "Waiting to complete pokemon detail")
-        var cancellabes = Set<AnyCancellable>()
 
         viewController.loadViewIfNeeded()
-        detailResult
-            .receive(on: DispatchQueue.main)
-            .sink(receiveCompletion: { _ in
-                XCTAssertTrue(router.isDismissing)
-                exp.fulfill()
-            }, receiveValue: { _ in })
-            .store(in: &cancellabes)
+        RunLoop.main.run(until: Date(timeIntervalSinceNow: 0.1))
 
-        wait(for: [exp], timeout: 1.0)
+        XCTAssertTrue(router.isDismissing)
     }
 }
 

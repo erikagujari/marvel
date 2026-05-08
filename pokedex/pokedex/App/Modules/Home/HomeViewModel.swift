@@ -7,6 +7,7 @@
 import Combine
 import UIKit
 
+@MainActor
 protocol HomeViewModelProtocol: BaseViewModel {
     var characters: CurrentValueSubject<[Pokemon], Never> { get set }
     var title: CurrentValueSubject<String, Never> { get set }
@@ -17,6 +18,7 @@ protocol HomeViewModelProtocol: BaseViewModel {
     func idForRowAt(_ index: Int) -> Int
 }
 
+@MainActor
 final class HomeViewModel {
     private let fetchPokemonUseCase: FetchPokemonUseCase
     private let limitRequest: Int
@@ -53,6 +55,7 @@ final class HomeViewModel {
     private func loadCharacters(offset: Int) {
         showSpinner.send(true)
         fetchPokemonUseCase.execute(limit: limitRequest, offset: offset)
+            .receive(on: DispatchQueue.main)
             .sink { [weak self] result in
                 if case let .failure(error) = result {
                     self?.showError.send((Constants.errorTitle, error.description))
@@ -74,7 +77,11 @@ extension HomeViewModel: HomeViewModelProtocol {
     }
 
     func cellModel(for index: Int, imageAction: @escaping (UIImage) -> Void) -> HomeCellModel {
-        let model = characters.value[index]
+        let snapshot = characters.value
+        guard snapshot.indices.contains(index) else {
+            return HomeCellModel(title: "", description: nil, cancelAction: nil)
+        }
+        let model = snapshot[index]
         guard let path = model.imageURL else {
             return HomeCellModel(title: model.name, description: nil, cancelAction: nil)
         }
@@ -88,7 +95,9 @@ extension HomeViewModel: HomeViewModelProtocol {
 
     func willDisplayItemAt(_ index: Int) {
         let characters = characters.value
-        guard let last = characters.last, characters[index] == last else { return }
+        guard characters.indices.contains(index),
+              let last = characters.last,
+              characters[index] == last else { return }
 
         loadCharacters(offset: characters.count)
     }
@@ -98,7 +107,9 @@ extension HomeViewModel: HomeViewModelProtocol {
     }
 
     func idForRowAt(_ index: Int) -> Int {
-        return characters.value[index].id
+        let snapshot = characters.value
+        guard snapshot.indices.contains(index) else { return -1 }
+        return snapshot[index].id
     }
 }
 

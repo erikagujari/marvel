@@ -7,7 +7,7 @@
 
 import Foundation
 
-protocol ImageDataStore {
+protocol ImageDataStore: Sendable {
     typealias RetrievalResult = Result<Data?, Error>
     typealias InsertionResult = Result<Void, Error>
 

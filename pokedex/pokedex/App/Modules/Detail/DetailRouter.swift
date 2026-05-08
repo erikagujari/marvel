@@ -7,11 +7,13 @@
 
 import UIKit
 
+@MainActor
 protocol DetailRouterProtocol {
     var viewController: UIViewController? { get }
     func showError(title: String, message: String)
 }
 
+@MainActor
 final class DetailRouter: DetailRouterProtocol {
     weak var viewController: UIViewController?
 

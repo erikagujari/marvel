@@ -8,6 +8,7 @@
 import CoreData
 import UIKit
 
+@MainActor
 final class HomeUIComposer {
     private init() {}
 

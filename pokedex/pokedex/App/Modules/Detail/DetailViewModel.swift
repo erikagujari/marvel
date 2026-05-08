@@ -8,12 +8,14 @@
 import Combine
 import UIKit
 
+@MainActor
 protocol DetailViewModelProtocol: BaseViewModel {
     var pokemonDetail: PassthroughSubject<PokemonDetail, Never> { get set }
     var loadedImage: PassthroughSubject<UIImage, Never> { get set }
     func fetchDetail()
 }
 
+@MainActor
 final class DetailViewModel {
     private let id: Int
     private let fetchUseCase: FetchPokemonDetailUseCase
@@ -34,6 +36,7 @@ final class DetailViewModel {
         guard let path = path else { return }
 
         imageLoader.fetch(from: path)
+            .receive(on: DispatchQueue.main)
             .sink { [weak self] result in
                 if case .failure = result,
                    let image = UIImage(named: "wifi") {
@@ -50,6 +53,7 @@ extension DetailViewModel: DetailViewModelProtocol {
     func fetchDetail() {
         showSpinner.send(true)
         fetchUseCase.execute(id: id)
+            .receive(on: DispatchQueue.main)
             .sink { [weak self] result in
                 self?.showSpinner.send(false)
                 if case let .failure(error) = result {

@@ -5,11 +5,14 @@
 //  Created by Erik Agujari on 11/11/21.
 //
 
-import CoreData
+@preconcurrency import CoreData
 
-public class CoreDataFeedStore {
+// All mutable state is funneled through `context.perform`, which serializes access on
+// the background queue owned by `NSManagedObjectContext`. CoreData types are not yet
+// audited for `Sendable`, so this conformance is unchecked.
+public final class CoreDataFeedStore: @unchecked Sendable {
     private static let modelName = "CoreDataFeed"
-    private static let model = NSManagedObjectModel.with(name: modelName, in: Bundle(for: CoreDataFeedStore.self))
+    nonisolated(unsafe) private static let model = NSManagedObjectModel.with(name: modelName, in: Bundle(for: CoreDataFeedStore.self))
     private let container: NSPersistentContainer
     let context: NSManagedObjectContext
 
@@ -33,7 +36,8 @@ public class CoreDataFeedStore {
 
     func perform(_ action: @escaping (NSManagedObjectContext) -> Void) {
         let context = self.context
-        context.perform { action(context) }
+        nonisolated(unsafe) let safeAction = action
+        context.perform { safeAction(context) }
     }
 
     private func cleanUpReferencesToPersistentStores() {

@@ -6,6 +6,7 @@
 //
 import Combine
 
+@MainActor
 protocol BaseViewModel {
     var showSpinner: PassthroughSubject<Bool, Never> { get }
     var showError: PassthroughSubject<(String, String), Never> { get }

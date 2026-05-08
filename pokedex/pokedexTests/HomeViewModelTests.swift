@@ -8,6 +8,7 @@ import Combine
 @testable import pokedex
 import XCTest
 
+@MainActor
 final class HomeViewModelTests: XCTestCase {
     func test_fetchInitialCharacters_doesNotLoadCharactersOnUseCaseError() {
         let sut = makeSUT(fetchUseCaseResult: Fail<[Pokemon], APIError>(error: APIError.serviceError).eraseToAnyPublisher())
@@ -24,6 +25,7 @@ final class HomeViewModelTests: XCTestCase {
         let initialValue = sut.characters.value
 
         sut.fetchInitialCharacters()
+        RunLoop.main.run(until: Date(timeIntervalSinceNow: 0.05))
         let valueAfterLoad = sut.characters.value
 
         XCTAssertNotEqual(initialValue, valueAfterLoad)
@@ -36,6 +38,7 @@ final class HomeViewModelTests: XCTestCase {
         let exp = expectation(description: "Waiting to load image on cell model")
 
         sut.fetchInitialCharacters()
+        RunLoop.main.run(until: Date(timeIntervalSinceNow: 0.05))
         _ = sut.cellModel(for: 0) { loadedImage in
             XCTAssertEqual(loadedImage, image)
             exp.fulfill()
@@ -50,6 +53,7 @@ final class HomeViewModelTests: XCTestCase {
         let exp = expectation(description: "Waiting to load image on cell model")
 
         sut.fetchInitialCharacters()
+        RunLoop.main.run(until: Date(timeIntervalSinceNow: 0.05))
         _ = sut.cellModel(for: 0) { loadedImage in
             XCTAssertEqual(loadedImage.pngData(), UIImage(named: "wifi")?.pngData())
             exp.fulfill()
@@ -63,8 +67,10 @@ final class HomeViewModelTests: XCTestCase {
                           imageLoaderResult: Fail(error: APIError.serviceError).eraseToAnyPublisher())
 
         sut.fetchInitialCharacters()
+        RunLoop.main.run(until: Date(timeIntervalSinceNow: 0.05))
         let itemsAfterInitialFetch = sut.characters.value
         sut.willDisplayItemAt(0)
+        RunLoop.main.run(until: Date(timeIntervalSinceNow: 0.05))
         let itemsAfterDisplayItemAt = sut.characters.value
 
         XCTAssertEqual(itemsAfterInitialFetch, itemsAfterDisplayItemAt)
@@ -76,8 +82,10 @@ final class HomeViewModelTests: XCTestCase {
                           nextLoadResult: Fail(error: APIError.serviceError).eraseToAnyPublisher())
 
         sut.fetchInitialCharacters()
+        RunLoop.main.run(until: Date(timeIntervalSinceNow: 0.05))
         let itemsAfterInitialFetch = sut.characters.value
         sut.willDisplayItemAt(1)
+        RunLoop.main.run(until: Date(timeIntervalSinceNow: 0.05))
         let itemsAfterDisplayItemAt = sut.characters.value
 
         XCTAssertEqual(itemsAfterInitialFetch, itemsAfterDisplayItemAt)
@@ -89,8 +97,10 @@ final class HomeViewModelTests: XCTestCase {
                           nextLoadResult: Just(anyPokemonList(ids: [2, 3, 4])).setFailureType(to: APIError.self).eraseToAnyPublisher())
 
         sut.fetchInitialCharacters()
+        RunLoop.main.run(until: Date(timeIntervalSinceNow: 0.05))
         let itemsAfterInitialFetch = sut.characters.value
         sut.willDisplayItemAt(1)
+        RunLoop.main.run(until: Date(timeIntervalSinceNow: 0.05))
         let itemsAfterDisplayItemAt = sut.characters.value
 
         XCTAssertNotEqual(itemsAfterInitialFetch, itemsAfterDisplayItemAt)

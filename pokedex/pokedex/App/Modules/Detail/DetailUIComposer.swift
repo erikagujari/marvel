@@ -7,6 +7,7 @@
 import CoreData
 import UIKit
 
+@MainActor
 final class DetailUIComposer {
     private init() {}
 

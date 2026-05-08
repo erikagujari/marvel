@@ -1,7 +1,7 @@
 ---
 name: ship
 description: Split this repo's dirty working tree into logical commits (prod+unit / integration / config), then chain into the local /pr-ready. Plain subjects, no ticket prefix. Pass --single to skip splitting, --dry-run to preview, --no-pr-ready to commit without chaining.
-allowed-tools: Bash(git:*), Bash(swiftlint:*), Read, Skill, TaskCreate, TaskUpdate
+allowed-tools: Bash(git:*), Bash(gh:*), Bash(swiftlint:*), Read, Skill, TaskCreate, TaskUpdate
 argument-hint: "[--single] [--dry-run] [--no-pr-ready]"
 model: sonnet
 ---
@@ -43,9 +43,16 @@ Parse `$ARGUMENTS` first.
 ## STEP 0 — Preflight
 
 1. **Protected-branch guard**: `BRANCH_NAME="$(git branch --show-current)"`. If empty (detached HEAD) or matches `main`, `master`, `release/*`, `hotfix/*`, stop. This skill commits and would push to a release line via `/pr-ready`.
-2. **Working tree must be dirty**: `git status --porcelain`. If empty, stop and suggest invoking `/pr-ready` directly — there's nothing to commit.
-3. **Compute `EXCLUDED_PATHS`**: any path matching `.env*`, `*.pem`, `credentials*`, `*.p12`, `*.mobileprovision`, `.claude/settings.local.json`, `.claude/scheduled_tasks.lock`. Surface them to the user as "will not be staged" but do not stop.
-4. Create a task list via `TaskCreate`:
+2. **Branch-already-merged guard**: determine whether the current branch's PR has already merged. Run `gh pr view --json state,url 2>/dev/null` (authoritative across all merge methods — `gh` knows from the PR id, not from ancestry):
+   - `MERGED` → stop. Surface the PR URL and offer three paths: (a) create a fresh branch from `origin/main` and re-run `/ship` there, (b) hard-reset the current branch to its pre-merge tip if the user genuinely intends to revive it, (c) abort. Do not auto-pick.
+   - `CLOSED` (not merged) → warn and continue. The user may be reviving an abandoned PR.
+   - `OPEN` → continue. Surface the URL so the user knows `/pr-ready` will push to an existing PR rather than open a new one.
+   - No PR found or `gh` unavailable → fall through to the local fallback below.
+
+   **Local fallback (only when `gh` couldn't answer)**: `git fetch origin main --quiet`, then `git merge-base --is-ancestor HEAD origin/main`. Exit `0` means the branch HEAD is reachable from `origin/main` — usually an out-of-band merge or a fresh branch that never diverged. Stop with the same remedy menu as `MERGED`. **This fallback only catches merge-commit and fast-forward merges**; squash- and rebase-merged PRs rewrite commits as new SHAs on main with no ancestry path back to the original branch SHAs, so the local check returns exit `1` and silently misses them. That's why `gh pr view` is the primary detector. If `git fetch` itself fails (offline), use the local `main` ref and surface that the answer is based on stale data.
+3. **Working tree must be dirty**: `git status --porcelain`. If empty, stop and suggest invoking `/pr-ready` directly — there's nothing to commit.
+4. **Compute `EXCLUDED_PATHS`**: any path matching `.env*`, `*.pem`, `credentials*`, `*.p12`, `*.mobileprovision`, `.claude/settings.local.json`, `.claude/scheduled_tasks.lock`. Surface them to the user as "will not be staged" but do not stop.
+5. Create a task list via `TaskCreate`:
    - "Classify diff"
    - "Propose split"
    - "Confirm plan"

@@ -4,117 +4,68 @@
 //
 //  Created by Erik Agujari on 27/10/21.
 //
-
-import Combine
 @testable import pokedex
 import XCTest
 
 final class ImageLoaderUseCaseTests: XCTestCase {
-    func test_fetchReturnsCachedImage_onValidCache() throws {
+    func test_fetchReturnsCachedImage_onValidCache() async throws {
         let path = "any-path"
         let cachedImage = UIImage(systemName: "star")!
-        let sut = try makeSUT(path: path, cachedImageData: cachedImage.pngData())
-        let exp = expectation(description: "Waiting to load image")
-        var cancellables = Set<AnyCancellable>()
+        let sut = try await makeSUT(path: path, cachedImageData: cachedImage.pngData())
 
-        sut.fetch(from: path)
-            .sink { result in
-                if case .failure = result {
-                    XCTFail("It should have succeed with an image")
-                }
-                exp.fulfill()
-            } receiveValue: { image in
-                let transformedImage = UIImage(data: cachedImage.pngData()!)!
-                XCTAssertEqual(image.pngData(), transformedImage.pngData())
-            }
-            .store(in: &cancellables)
-
-        wait(for: [exp], timeout: 1.0)
+        let image = try await sut.fetch(from: path)
+        let transformedImage = UIImage(data: cachedImage.pngData()!)!
+        XCTAssertEqual(image.pngData(), transformedImage.pngData())
     }
 
-    func test_fetchReturnsError_onClientError() throws {
+    func test_fetchReturnsError_onClientError() async throws {
         let path = "a path"
-        let error = APIError.mappingError
-        let sut = try makeSUT(path: path, httpClientResult: Fail(error: error).eraseToAnyPublisher())
-        let exp = expectation(description: "Waiting to load image")
-        var cancellables = Set<AnyCancellable>()
+        let expected = APIError.mappingError
+        let sut = try await makeSUT(path: path, httpClientResult: .failure(expected))
 
-        sut.fetch(from: path)
-            .sink { result in
-                switch result {
-                case let .failure(receivedError):
-                    XCTAssertEqual(error, receivedError)
-                case .finished:
-                    XCTFail("The result should be a failure")
-                }
-                exp.fulfill()
-            } receiveValue: { _ in }
-            .store(in: &cancellables)
-
-        wait(for: [exp], timeout: 1.0)
+        do {
+            _ = try await sut.fetch(from: path)
+            XCTFail("Expected failure, got success")
+        } catch let error as APIError {
+            XCTAssertEqual(error, expected)
+        } catch {
+            XCTFail("Expected APIError but got \(error)")
+        }
     }
 
-    func test_fetchReturnsError_onClientSuccessWithNotValidData() throws {
+    func test_fetchReturnsError_onClientSuccessWithNotValidData() async throws {
         let path = "a path"
-        let httpResult = Just(Data())
-            .setFailureType(to: APIError.self)
-            .eraseToAnyPublisher()
-        let sut = try makeSUT(path: path, httpClientResult: httpResult)
-        let exp = expectation(description: "Waiting to load image")
-        var cancellables = Set<AnyCancellable>()
+        let sut = try await makeSUT(path: path, httpClientResult: .success(Data()))
 
-        sut.fetch(from: path)
-            .sink { result in
-                switch result {
-                case let .failure(receivedError):
-                    XCTAssertEqual(.serviceError, receivedError)
-                case .finished:
-                    XCTFail("The result should be a failure")
-                }
-                exp.fulfill()
-            } receiveValue: { _ in }
-            .store(in: &cancellables)
-
-        wait(for: [exp], timeout: 1.0)
+        do {
+            _ = try await sut.fetch(from: path)
+            XCTFail("Expected failure, got success")
+        } catch let error as APIError {
+            XCTAssertEqual(error, .serviceError)
+        } catch {
+            XCTFail("Expected APIError but got \(error)")
+        }
     }
 
-    func test_fetchReturnsSuccessWithImage_onClientSuccessWithValidData() throws {
+    func test_fetchReturnsSuccessWithImage_onClientSuccessWithValidData() async throws {
         let path = "a path"
         let loadedImage = UIImage(systemName: "star")!
-        let httpResult = Just(loadedImage.jpegData(compressionQuality: 1.0)!)
-            .setFailureType(to: APIError.self)
-            .eraseToAnyPublisher()
-        let sut = try makeSUT(path: path, httpClientResult: httpResult)
-        let exp = expectation(description: "Waiting to load image")
-        var cancellables = Set<AnyCancellable>()
+        let sut = try await makeSUT(path: path, httpClientResult: .success(loadedImage.jpegData(compressionQuality: 1.0)!))
 
-        sut.fetch(from: path)
-            .sink { result in
-                switch result {
-                case .finished: break
-                case let .failure(error):
-                    XCTFail(error.localizedDescription)
-                }
-                exp.fulfill()
-            } receiveValue: { _ in }
-            .store(in: &cancellables)
-
-        wait(for: [exp], timeout: 1.0)
+        _ = try await sut.fetch(from: path)
     }
 }
 
 private extension ImageLoaderUseCaseTests {
     func makeSUT(
         path: String,
-        httpClientResult: AnyPublisher<Data, APIError> = Just(Data())
-            .setFailureType(to: APIError.self)
-            .eraseToAnyPublisher(),
+        httpClientResult: Result<Data, APIError> = .success(Data()),
         cachedImageData: Data? = nil
-    ) throws -> ImageLoaderUseCase {
+    ) async throws -> ImageLoaderUseCase {
         deleteStoreArtifacts()
         let cache = try CoreDataFeedStore(localURL: testSpecificStoreURL())
         if let cachedImageData = cachedImageData {
-            cache.insert(cachedImageData, for: path, completion: { _ in })
+            try await cache.insert(cachedImageData, for: path)
         }
         let sut = ImageLoaderProvider(client: HTTPClientStub(result: httpClientResult),
                                       cache: cache)
@@ -124,14 +75,14 @@ private extension ImageLoaderUseCaseTests {
     }
 
     struct HTTPClientStub: HTTPClient {
-        let result: AnyPublisher<Data, APIError>
+        let result: Result<Data, APIError>
 
-        func fetch(request: Service) -> AnyPublisher<Data, APIError> {
-            return result
+        func fetch(_ request: Service) async throws -> Data {
+            try result.get()
         }
 
-        func fetch<T>(_ request: Service, responseType: T.Type) -> AnyPublisher<T, APIError> where T: Decodable {
-            return Empty<T, APIError>().eraseToAnyPublisher()
+        func fetch<T>(_ request: Service, responseType: T.Type) async throws -> T where T: Decodable {
+            throw APIError.serviceError
         }
     }
 

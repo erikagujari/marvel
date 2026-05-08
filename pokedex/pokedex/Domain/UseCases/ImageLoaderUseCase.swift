@@ -5,11 +5,10 @@
 //  Created by Erik Agujari on 26/10/21.
 //
 
-import Combine
 import UIKit
 
-protocol ImageLoaderUseCase {
-    func fetch(from path: String) -> AnyPublisher<UIImage, APIError>
+protocol ImageLoaderUseCase: Sendable {
+    func fetch(from path: String) async throws -> UIImage
 }
 
 final class ImageLoaderProvider: ImageLoaderUseCase {
@@ -21,58 +20,17 @@ final class ImageLoaderProvider: ImageLoaderUseCase {
         self.cache = cache
     }
 
-    private func fetchCachedImage(for path: String) -> AnyPublisher<Data, APIError> {
-        return Deferred {
-            Future<Data, APIError> { [weak self] future in
-                self?.cache.retrieve(dataForPath: path, completion: { result in
-                    switch result {
-                    case .failure:
-                        future(.failure(APIError.cacheError))
-                    case let .success(data):
-                        guard let data = data else {
-                            future(.failure(APIError.cacheError))
-                            return
-                        }
-                        future(.success(data))
-                    }
-                })
-            }
-        }.eraseToAnyPublisher()
-    }
+    func fetch(from path: String) async throws -> UIImage {
+        if let cachedData = try? await cache.retrieve(dataForPath: path),
+           let image = UIImage(data: cachedData) {
+            return image
+        }
 
-    private func fetchNetworkImage(for path: String) -> AnyPublisher<Data, APIError> {
-        return client.fetch(request: ImageService.load(path))
-            .flatMap { [weak self] data in
-                self?.storeImage(data: data, path: path) ?? Fail(error: APIError.serviceError).eraseToAnyPublisher()
-            }
-            .eraseToAnyPublisher()
-    }
-
-    private func storeImage(data: Data, path: String) -> AnyPublisher<Data, APIError> {
-        return Deferred {
-            Future<Data, APIError> { [weak self] future in
-                self?.cache.insert(data, for: path, completion: { result in
-                    switch result {
-                    case .failure:
-                        future(.failure(APIError.cacheError))
-                    case .success:
-                        future(.success(data))
-                    }
-                })
-            }
-        }.eraseToAnyPublisher()
-    }
-
-    func fetch(from path: String) -> AnyPublisher<UIImage, APIError> {
-        fetchCachedImage(for: path)
-            .catch { [weak self] _ in
-                return self?.fetchNetworkImage(for: path) ?? Fail(error: APIError.serviceError).eraseToAnyPublisher()
-            }
-            .flatMap { data -> AnyPublisher<UIImage, APIError> in
-                guard let image = UIImage(data: data) else {
-                    return Fail(error: APIError.serviceError).eraseToAnyPublisher()
-                }
-                return Just(image).setFailureType(to: APIError.self).eraseToAnyPublisher()
-            }.eraseToAnyPublisher()
+        let data = try await client.fetch(ImageService.load(path))
+        try? await cache.insert(data, for: path)
+        guard let image = UIImage(data: data) else {
+            throw APIError.serviceError
+        }
+        return image
     }
 }

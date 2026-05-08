@@ -1,7 +1,7 @@
 ---
 name: ship
 description: Split this repo's dirty working tree into logical commits (prod+unit / integration / config), then chain into the local /pr-ready. Plain subjects, no ticket prefix. Pass --single to skip splitting, --dry-run to preview, --no-pr-ready to commit without chaining.
-allowed-tools: Bash(git:*), Bash(swiftlint:*), Read, Skill, TaskCreate, TaskUpdate
+allowed-tools: Bash(git:*), Bash(gh:*), Bash(swiftlint:*), Read, Skill, TaskCreate, TaskUpdate
 argument-hint: "[--single] [--dry-run] [--no-pr-ready]"
 model: sonnet
 ---
@@ -43,9 +43,19 @@ Parse `$ARGUMENTS` first.
 ## STEP 0 — Preflight
 
 1. **Protected-branch guard**: `BRANCH_NAME="$(git branch --show-current)"`. If empty (detached HEAD) or matches `main`, `master`, `release/*`, `hotfix/*`, stop. This skill commits and would push to a release line via `/pr-ready`.
-2. **Working tree must be dirty**: `git status --porcelain`. If empty, stop and suggest invoking `/pr-ready` directly — there's nothing to commit.
-3. **Compute `EXCLUDED_PATHS`**: any path matching `.env*`, `*.pem`, `credentials*`, `*.p12`, `*.mobileprovision`, `.claude/settings.local.json`, `.claude/scheduled_tasks.lock`. Surface them to the user as "will not be staged" but do not stop.
-4. Create a task list via `TaskCreate`:
+2. **Branch-already-merged guard**: `git fetch origin main --quiet`, then `git merge-base --is-ancestor HEAD origin/main` (exit `0` → HEAD is reachable from `origin/main`, i.e. the branch has been merged or never diverged). If yes, stop and surface the branch name plus three paths for the user to pick from:
+   - create a fresh branch from `origin/main` and re-run `/ship` there (typical case — the user wandered back into a merged feature branch);
+   - hard-reset the current branch to its pre-merge tip if they genuinely intend to revive it;
+   - abort.
+   Do not auto-pick. If `git fetch` fails (offline), fall back to the local `main` ref and continue with the same check; surface the fallback so the user knows the answer is based on stale data.
+3. **PR state guard**: `gh pr view --json state,url 2>/dev/null` for the current branch.
+   - `MERGED` → stop, same remedy menu as (2). Layering commits onto a merged PR's branch orphans them.
+   - `CLOSED` (not merged) → warn and continue. The user may be reviving an abandoned PR.
+   - `OPEN` → continue. Surface the PR URL so the user knows `/pr-ready` will push to an existing PR rather than open a new one.
+   - No PR found, or `gh` unavailable → continue silently.
+4. **Working tree must be dirty**: `git status --porcelain`. If empty, stop and suggest invoking `/pr-ready` directly — there's nothing to commit.
+5. **Compute `EXCLUDED_PATHS`**: any path matching `.env*`, `*.pem`, `credentials*`, `*.p12`, `*.mobileprovision`, `.claude/settings.local.json`, `.claude/scheduled_tasks.lock`. Surface them to the user as "will not be staged" but do not stop.
+6. Create a task list via `TaskCreate`:
    - "Classify diff"
    - "Propose split"
    - "Confirm plan"

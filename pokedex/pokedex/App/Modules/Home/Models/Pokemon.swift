@@ -5,7 +5,7 @@
 //  Created by Erik Agujari on 25/10/21.
 //
 
-struct Pokemon: Equatable {
+struct Pokemon: Equatable, Sendable {
     let id: Int
     let name: String
     let imageURL: String?

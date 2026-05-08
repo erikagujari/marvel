@@ -4,7 +4,7 @@
 //
 //  Created by Erik Agujari on 28/10/21.
 //
-import Combine
+
 import UIKit
 
 final class DetailViewController: UIViewController {
@@ -12,7 +12,7 @@ final class DetailViewController: UIViewController {
     private let router: DetailRouterProtocol
     private let scrollView = UIScrollView()
     private let contentView = UIView()
-    private var cancellables = Set<AnyCancellable>()
+    private var didConfigureContent = false
     private(set) lazy var imageView: UIImageView = {
         let imageView = UIImageView()
         NSLayoutConstraint.activate([
@@ -61,8 +61,8 @@ final class DetailViewController: UIViewController {
         super.viewDidLoad()
 
         setupView()
-        setupBinding()
-        viewModel.fetchDetail()
+        bind()
+        Task { @MainActor [weak self] in await self?.viewModel.fetchDetail() }
     }
 
     private func setupView() {
@@ -113,34 +113,37 @@ final class DetailViewController: UIViewController {
         }
     }
 
-    private func setupBinding() {
-        viewModel.showSpinner
-            .receive(on: DispatchQueue.main)
-            .sink(receiveValue: { [weak self] show in
-                show ? self?.view.showSpinner() : self?.view.dismissSpinner()
-            })
-            .store(in: &cancellables)
-
-        viewModel.pokemonDetail
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] pokemon in
-                self?.setupContent(pokemon: pokemon)
+    @MainActor
+    private func bind() {
+        withObservationTracking {
+            _ = viewModel.pokemon
+            _ = viewModel.image
+            _ = viewModel.isLoading
+            _ = viewModel.errorAlert
+        } onChange: { [weak self] in
+            Task { @MainActor in
+                guard let self else { return }
+                self.render()
+                self.bind()
             }
-            .store(in: &cancellables)
+        }
+        render()
+    }
 
-        viewModel.loadedImage
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] image in
-                self?.imageView.image = image
-                self?.imageView.dismissSpinner()
-            }
-            .store(in: &cancellables)
-
-        viewModel.showError
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] (title, message) in
-                self?.router.showError(title: title, message: message)
-            }
-            .store(in: &cancellables)
+    @MainActor
+    private func render() {
+        viewModel.isLoading ? view.showSpinner() : view.dismissSpinner()
+        if !didConfigureContent, let pokemon = viewModel.pokemon {
+            setupContent(pokemon: pokemon)
+            didConfigureContent = true
+        }
+        if let image = viewModel.image {
+            imageView.image = image
+            imageView.dismissSpinner()
+        }
+        if let alert = viewModel.errorAlert {
+            router.showError(title: alert.title, message: alert.message)
+            viewModel.errorAlert = nil
+        }
     }
 }

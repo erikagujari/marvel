@@ -5,26 +5,25 @@
 //  Created by Erik Agujari on 28/10/21.
 //
 
-import Combine
 import UIKit
 
 @MainActor
 protocol DetailViewModelProtocol: BaseViewModel {
-    var pokemonDetail: PassthroughSubject<PokemonDetail, Never> { get set }
-    var loadedImage: PassthroughSubject<UIImage, Never> { get set }
-    func fetchDetail()
+    var pokemon: PokemonDetail? { get }
+    var image: UIImage? { get }
+    func fetchDetail() async
 }
 
-@MainActor
-final class DetailViewModel {
-    private let id: Int
-    private let fetchUseCase: FetchPokemonDetailUseCase
-    private let imageLoader: ImageLoaderUseCase
-    private var cancellables = Set<AnyCancellable>()
-    var showError = PassthroughSubject<(String, String), Never>()
-    var showSpinner = PassthroughSubject<Bool, Never>()
-    var pokemonDetail = PassthroughSubject<PokemonDetail, Never>()
-    var loadedImage = PassthroughSubject<UIImage, Never>()
+@Observable @MainActor
+final class DetailViewModel: DetailViewModelProtocol {
+    @ObservationIgnored private let id: Int
+    @ObservationIgnored private let fetchUseCase: FetchPokemonDetailUseCase
+    @ObservationIgnored private let imageLoader: ImageLoaderUseCase
+
+    private(set) var pokemon: PokemonDetail?
+    private(set) var image: UIImage?
+    var isLoading: Bool = false
+    var errorAlert: ErrorAlert?
 
     init(id: Int, fetchUseCase: FetchPokemonDetailUseCase, imageLoader: ImageLoaderUseCase) {
         self.id = id
@@ -32,38 +31,27 @@ final class DetailViewModel {
         self.imageLoader = imageLoader
     }
 
-    private func loadImage(path: String?) {
-        guard let path = path else { return }
-
-        imageLoader.fetch(from: path)
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] result in
-                if case .failure = result,
-                   let image = UIImage(named: "wifi") {
-                    self?.loadedImage.send(image)
-                }
-            } receiveValue: { [weak self] image in
-                self?.loadedImage.send(image)
-            }
-            .store(in: &cancellables)
+    func fetchDetail() async {
+        isLoading = true
+        defer { isLoading = false }
+        do {
+            let detail = try await fetchUseCase.execute(id: id)
+            pokemon = detail
+            await loadImage(path: detail.imageURL)
+        } catch let error as APIError {
+            errorAlert = ErrorAlert(title: Constants.errorTitle, message: error.description)
+        } catch {
+            errorAlert = ErrorAlert(title: Constants.errorTitle, message: APIError.serviceError.description)
+        }
     }
-}
 
-extension DetailViewModel: DetailViewModelProtocol {
-    func fetchDetail() {
-        showSpinner.send(true)
-        fetchUseCase.execute(id: id)
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] result in
-                self?.showSpinner.send(false)
-                if case let .failure(error) = result {
-                    self?.showError.send((Constants.errorTitle, error.description))
-                }
-            } receiveValue: { [weak self] pokemon in
-                self?.pokemonDetail.send(pokemon)
-                self?.loadImage(path: pokemon.imageURL)
-            }
-            .store(in: &cancellables)
+    private func loadImage(path: String?) async {
+        guard let path = path else { return }
+        do {
+            image = try await imageLoader.fetch(from: path)
+        } catch {
+            image = UIImage(named: "wifi")
+        }
     }
 }
 

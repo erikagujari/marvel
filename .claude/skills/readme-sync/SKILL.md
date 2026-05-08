@@ -1,7 +1,7 @@
 ---
 name: readme-sync
 description: Detect drift between README.md and the pokedex codebase, propose a patch, apply it on confirmation. Diff-gates on signal files vs origin/main; skips the LLM pass entirely when nothing structural changed. Pass --since <ref> to compare against a different base, --report-only to print the diff without applying.
-allowed-tools: Bash(git:*), Read, Edit
+allowed-tools: Bash(git:*), Bash(grep:*), Bash(head:*), Read, Edit
 argument-hint: "[--since <ref>] [--report-only]"
 model: sonnet
 ---
@@ -49,16 +49,16 @@ Filter the output to the **signal set** — files that, if changed, could invali
 If the filtered set is **empty**: print
 
 ```
-README in sync (no signal files changed since <base>).
+STATUS: IN-SYNC (no signal files changed since <base>)
 ```
 
-and exit. Do not proceed to STEP 2.
+and exit. Do not proceed to STEP 2. (The `STATUS:` prefix matches the format the embedded `/pr-ready` README-sync subagent uses, so this skill's output is interchangeable with that subagent's output.)
 
 ## STEP 2 — Drift check
 
 Read `README.md` in full.
 
-For each file in the filtered signal set, `Read` it. If a file is longer than 200 lines, read only the first 200. (`project.pbxproj` is verbose — for that file, also `grep -n IPHONEOS_DEPLOYMENT_TARGET pokedex/pokedex.xcodeproj/project.pbxproj | head -3` to extract the deployment target directly.)
+For each file in the filtered signal set, `Read` it. If a file is longer than 200 lines, read only the first 200. (`project.pbxproj` is verbose — do **not** `Read` it. Instead, run `grep -n IPHONEOS_DEPLOYMENT_TARGET pokedex/pokedex.xcodeproj/project.pbxproj | head -3` to extract the deployment target directly; that's the only signal that file carries for README purposes.)
 
 Then walk the README section by section and check each claim against the code you just read:
 
@@ -71,7 +71,7 @@ Then walk the README section by section and check each claim against the code yo
 If every claim still matches: print
 
 ```
-README in sync (LLM pass: NO-OP).
+STATUS: NO-OP (README accurate)
 ```
 
 and exit.

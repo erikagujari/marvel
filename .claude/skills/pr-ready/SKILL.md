@@ -38,11 +38,11 @@ Parse `$ARGUMENTS` first.
    - "README sync"
    - "Push branch"
    - "Open PR" (omit if `--dry-run`)
-6. **Fire the README-sync subagent in parallel** (do **not** await it; build+test starts immediately afterwards). The subagent runs in its own context so the signal-file reads stay out of this thread:
+6. **Fire the README-sync subagent in parallel** (do **not** await it; build+test starts immediately afterwards). The subagent runs in its own context so the signal-file reads stay out of this thread. Use `subagent_type: "Explore"` — it is read-only by design (no `Edit`, no `Write`), so the subagent **cannot** mutate the working tree even if the prompt is misinterpreted.
 
    ```
    Agent(
-     subagent_type: "general-purpose",
+     subagent_type: "Explore",
      description: "README drift check",
      run_in_background: true,
      prompt: <see template below>
@@ -51,14 +51,14 @@ Parse `$ARGUMENTS` first.
 
    Save the agent's id/name — you'll collect its result in STEP 2.5.
 
-   **Prompt template** (self-contained — the subagent has no session context):
+   **Prompt template** (self-contained — the subagent has no session context. Do not interpolate any absolute path; the subagent inherits the cwd of this session, which is the repo root):
 
-   > You are a README-drift detector for the pokedex iOS repo at `/Users/erik.agujari/Projects/marvel`. Determine whether `README.md` still matches reality, and if not, propose a minimal patch.
+   > You are a README-drift detector for the pokedex iOS repo. Your cwd is the repo root. Determine whether `README.md` still matches reality, and if not, propose a minimal patch.
    >
    > 1. Run `git fetch origin main --quiet` then list changed files with `git diff --name-only origin/main..HEAD`.
    > 2. Filter to the **signal set**: `pokedex/pokedex/**/*.swift`, `pokedex/pokedex/Data/Services/**`, `pokedex/pokedex.xcodeproj/project.pbxproj`, `.swiftlint.yml`, `.githooks/**`, `CLAUDE.md`.
    > 3. If the filtered set is empty, return exactly: `STATUS: IN-SYNC (no signal files changed)` and stop.
-   > 4. Otherwise read `README.md` in full, then read each changed signal file (truncate >200 lines; for `project.pbxproj`, just `grep -n IPHONEOS_DEPLOYMENT_TARGET pokedex/pokedex.xcodeproj/project.pbxproj | head -3`).
+   > 4. Otherwise read `README.md` in full, then read each changed signal file (truncate >200 lines; for `project.pbxproj`, do **not** read the file — instead, run `grep -n IPHONEOS_DEPLOYMENT_TARGET pokedex/pokedex.xcodeproj/project.pbxproj | head -3` to extract the deployment target).
    > 5. Walk README sections (Architecture, UI Details, Testing, Stack, Linting). For each, check whether the current claim still matches the code. Common drift: "Xcode 13"/"iOS 15" lines vs `IPHONEOS_DEPLOYMENT_TARGET`; folder bullets vs actual subfolders; PokéAPI endpoint descriptions vs `Data/Services/` enum cases; SwiftLint setup vs `.swiftlint.yml` and `.githooks/pre-commit`; build/test commands vs `CLAUDE.md`.
    > 6. If everything still matches, return exactly: `STATUS: NO-OP (README accurate)`.
    > 7. Otherwise return:
@@ -72,7 +72,7 @@ Parse `$ARGUMENTS` first.
    >    ```
    >    ```
    >
-   > Do not write to any file. Do not stage, commit, or push. Return only the verdict described above.
+   > Return only the verdict described above. (The Explore subagent has no write tools, so this is enforced by capability — but state it for clarity.)
 
 ## STEP 1 — Build + test
 
@@ -97,25 +97,28 @@ Invoke the global `/code-review` skill via `Skill`. It is generic and reads the 
 
 ## STEP 2.5 — README sync (soft gate)
 
-Collect the README-sync subagent result that was kicked off in STEP 0. If it's still running, wait for it now — by this point build+test and code-review have both finished, so the subagent should be done or close to it.
+Collect the README-sync subagent result that was kicked off in STEP 0.
 
-Branch on the `STATUS:` line at the top of its output:
+**How to wait**: when a background `Agent(...)` finishes, the harness pushes a `<task-notification>` system message containing a `<result>` block with the subagent's final output. By the time you reach STEP 2.5, that notification should already be in your context (build+test and code-review take long enough that the README check almost always finishes first). Scan back through the conversation for the `<task-notification>` whose `<task-id>` matches the id you saved in STEP 0 and read its `<result>`. If no such notification has arrived yet, **do not block waiting** — treat the outcome as "errored" (see below). This is a soft gate; a slow drift check must not delay the PR.
+
+Branch on the `STATUS:` line at the top of the subagent's `<result>`:
 
 - `STATUS: IN-SYNC (...)` or `STATUS: NO-OP (...)` — continue silently. Mark the "README sync" task completed; record the outcome ("in-sync" / "no-op") for STEP 5.
 
 - `STATUS: DRIFT` — the subagent returned a proposed `README.md` diff. Surface it to the user:
 
   1. Print the `SIGNALS_CHANGED:` line and the ```diff block from the subagent's output.
-  2. Ask: `Apply this README update before pushing? (y/n)`
-     - On `y`: apply each hunk via `Edit` to `README.md`, then:
+  2. If `--dry-run` was passed: print "would apply README update and commit (dry-run, skipping)" and record outcome "drift-dry-run" for STEP 5. Do NOT call `Edit` or commit.
+  3. Otherwise ask: `Apply this README update before pushing? (y/n)`
+     - On `y`: apply each hunk via `Edit` to `README.md`. After the last `Edit` succeeds, run `git status --porcelain` — if anything other than `README.md` is dirty, **stop** and surface (an `Edit` partial-failure or a stray write must not be silently committed). Otherwise:
        ```
        git add README.md
-       git commit -m "docs: sync README to current code state"
+       git commit -m "docs: sync README after changes to <SIGNALS_CHANGED list>"
        ```
-       The new commit will be included in the push. Record outcome "applied" for STEP 5.
+       Interpolate the `SIGNALS_CHANGED:` list from the subagent's output into the commit subject (truncate to ≤72 chars). The new commit will be included in the push. Record outcome "applied" (with the new commit hash) for STEP 5.
      - On `n` (or anything else): leave `README.md` untouched and continue. Record outcome "declined" for STEP 5.
 
-- Subagent failed, timed out, or produced unparseable output: record outcome "errored" for STEP 5 and continue. **Do not block.** This is a soft gate; a flaky drift check must not stop a PR.
+- Subagent failed, timed out, produced unparseable output, or no notification arrived: record outcome "errored" for STEP 5 and continue. **Do not block.** This is a soft gate; a flaky drift check must not stop a PR.
 
 Mark the "README sync" task completed regardless of outcome.
 
@@ -167,7 +170,7 @@ Print:
 - The PR URL (or "dry-run, no PR created").
 - The list of commits that landed in this run (`git log --oneline origin/main..HEAD`).
 - A note if `--no-review` was used (so the user remembers they skipped that gate).
-- README-sync outcome: `in-sync`, `no-op`, `applied` (and the docs commit hash), `declined` (drift surfaced but user said no), or `errored` (subagent failed — drift state unknown).
+- README-sync outcome: `in-sync`, `no-op`, `applied` (and the docs commit hash), `declined` (drift surfaced but user said no), `drift-dry-run` (drift surfaced under `--dry-run`, no commit made), or `errored` (subagent failed or notification never arrived — drift state unknown).
 
 Stop. The user's responsibility from here is to review the PR in the browser.
 

@@ -8,7 +8,7 @@ The Xcode project lives one level below the repo root, inside `pokedex/`:
 - App sources: `pokedex/pokedex/`
 - Tests: `pokedex/pokedexTests/`
 
-Vanilla Xcode project — no SPM `Package.swift`, no CocoaPods, no Carthage, no Makefile, no fastlane. Swift 5.0, iOS deployment target 15.0. Scheme and app target are both `pokedex`; the test target is `pokedexTests`.
+Vanilla Xcode project — no SPM `Package.swift`, no CocoaPods, no Carthage, no Makefile, no fastlane. Swift 5.0, iOS deployment target 17.0. Scheme and app target are both `pokedex`; the test target is `pokedexTests`.
 
 ## Build & test
 All `xcodebuild` invocations must reference the nested project path:

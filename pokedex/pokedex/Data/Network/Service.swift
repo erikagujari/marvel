@@ -6,15 +6,15 @@
 //
 import Foundation
 
-enum ServiceMethod: String {
+enum ServiceMethod: String, Sendable {
     case get = "GET"
     case post = "POST"
 }
 
-protocol Service {
+protocol Service: Sendable {
     var baseURL: String { get }
     var path: String? { get }
-    var parameters: [String: Any]? { get }
+    var parameters: [String: String]? { get }
     var method: ServiceMethod { get }
 }
 
@@ -28,7 +28,7 @@ extension Service {
         request.allHTTPHeaderFields = headers
         if method == .post,
             let parameters = parameters,
-            let body = try? JSONSerialization.data(withJSONObject: parameters, options: .prettyPrinted) {
+            let body = try? JSONSerialization.data(withJSONObject: parameters as [String: Any], options: .prettyPrinted) {
             request.httpBody = body
         }
         printRequest(urlRequest: request)
@@ -50,7 +50,7 @@ extension Service {
         }
 
         if method == .get {
-            guard let parameters = parameters as? [String: String] else { return urlComponents?.url }
+            guard let parameters = parameters else { return urlComponents?.url }
 
             urlComponents?.queryItems = parameters.map { URLQueryItem(name: $0.key, value: $0.value) }
         }

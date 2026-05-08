@@ -27,7 +27,7 @@ enum PokemonService: Service {
         }
     }
 
-    var parameters: [String: Any]? {
+    var parameters: [String: String]? {
         switch self {
         case let .list(offset, limit):
             return ["offset": String(offset), "limit": String(limit)]

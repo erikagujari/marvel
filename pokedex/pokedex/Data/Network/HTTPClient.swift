@@ -4,12 +4,11 @@
 //
 //  Created by Erik Agujari on 23/10/21.
 //
-import Combine
 import Foundation
 
-protocol HTTPClient {
-    func fetch(request: Service) -> AnyPublisher<Data, APIError>
-    func fetch<T: Decodable>(_ request: Service, responseType: T.Type) -> AnyPublisher<T, APIError>
+protocol HTTPClient: Sendable {
+    func fetch(_ request: Service) async throws -> Data
+    func fetch<T: Decodable>(_ request: Service, responseType: T.Type) async throws -> T
 }
 
 final class URLSessionHTTPClient: HTTPClient {
@@ -19,42 +18,31 @@ final class URLSessionHTTPClient: HTTPClient {
         self.session = session
     }
 
-    func fetch(request: Service) -> AnyPublisher<Data, APIError> {
-        return session.dataTaskPublisher(for: request.urlRequest)
-            .tryMap { data, response in
-                guard let httpResponse = response as? HTTPURLResponse else {
-                    throw APIError.serviceError
-                }
-
-                guard (200...299).contains(httpResponse.statusCode) else {
-                    throw APIError.serviceError
-                }
-                return data
+    func fetch(_ request: Service) async throws -> Data {
+        do {
+            let (data, response) = try await session.data(for: request.urlRequest)
+            guard let httpResponse = response as? HTTPURLResponse,
+                  (200...299).contains(httpResponse.statusCode) else {
+                throw APIError.serviceError
             }
-            .mapError { error -> APIError in
-                switch error {
-                case let error as APIError:
-                    return error
-                default:
-                    return APIError.serviceError
-                }
-            }
-            .eraseToAnyPublisher()
+            return data
+        } catch let error as APIError {
+            throw error
+        } catch {
+            throw APIError.serviceError
+        }
     }
 
-    func fetch<T: Decodable>(_ request: Service, responseType: T.Type) -> AnyPublisher<T, APIError> {
-        return fetch(request: request)
-            .decode(type: T.self, decoder: JSONDecoder())
-            .mapError { error -> APIError in
-                switch error {
-                case let error as APIError:
-                    return error
-                case is DecodingError:
-                    return APIError.mappingError
-                default:
-                    return APIError.serviceError
-                }
-            }
-            .eraseToAnyPublisher()
+    func fetch<T: Decodable>(_ request: Service, responseType: T.Type) async throws -> T {
+        let data = try await fetch(request)
+        do {
+            return try JSONDecoder().decode(T.self, from: data)
+        } catch is DecodingError {
+            throw APIError.mappingError
+        } catch let error as APIError {
+            throw error
+        } catch {
+            throw APIError.serviceError
+        }
     }
 }

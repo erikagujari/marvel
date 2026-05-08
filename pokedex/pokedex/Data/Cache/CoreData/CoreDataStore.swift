@@ -34,10 +34,11 @@ public final class CoreDataFeedStore: @unchecked Sendable {
         }
     }
 
-    func perform(_ action: @escaping (NSManagedObjectContext) -> Void) {
+    func perform<T: Sendable>(
+        _ action: @Sendable @escaping (NSManagedObjectContext) throws -> T
+    ) async throws -> T {
         let context = self.context
-        nonisolated(unsafe) let safeAction = action
-        context.perform { safeAction(context) }
+        return try await context.perform { try action(context) }
     }
 
     private func cleanUpReferencesToPersistentStores() {

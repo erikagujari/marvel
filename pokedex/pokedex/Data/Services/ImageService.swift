@@ -19,7 +19,7 @@ enum ImageService: Service {
         return nil
     }
 
-    var parameters: [String: Any]? {
+    var parameters: [String: String]? {
         return nil
     }
 

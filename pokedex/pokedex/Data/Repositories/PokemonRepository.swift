@@ -4,11 +4,10 @@
 //
 //  Created by Erik Agujari on 23/10/21.
 //
-import Combine
 
-protocol PokemonRepository {
-    func fetch(offset: Int, limit: Int) -> AnyPublisher<[Pokemon], APIError>
-    func fetchDetail(id: Int) -> AnyPublisher<PokemonDetail, APIError>
+protocol PokemonRepository: Sendable {
+    func fetch(offset: Int, limit: Int) async throws -> [Pokemon]
+    func fetchDetail(id: Int) async throws -> PokemonDetail
 }
 
 struct PokemonRepositoryProvider: PokemonRepository {
@@ -18,20 +17,23 @@ struct PokemonRepositoryProvider: PokemonRepository {
         self.httpClient = httpClient
     }
 
-    func fetch(offset: Int, limit: Int) -> AnyPublisher<[Pokemon], APIError> {
-        return httpClient.fetch(PokemonService.list(offset: offset, limit: limit), responseType: PokemonListResponse.self)
-            .map { response in
-                return response.results.compactMap(Pokemon.init(from:))
-            }
-            .eraseToAnyPublisher()
+    func fetch(offset: Int, limit: Int) async throws -> [Pokemon] {
+        let response = try await httpClient.fetch(
+            PokemonService.list(offset: offset, limit: limit),
+            responseType: PokemonListResponse.self
+        )
+        return response.results.compactMap(Pokemon.init(from:))
     }
 
-    func fetchDetail(id: Int) -> AnyPublisher<PokemonDetail, APIError> {
-        let detail = httpClient.fetch(PokemonService.detail(id: id), responseType: PokemonDetailResponse.self)
-        let species = httpClient.fetch(PokemonService.species(id: id), responseType: PokemonSpeciesResponse.self)
-
-        return Publishers.Zip(detail, species)
-            .map { PokemonDetail(detail: $0.0, species: $0.1) }
-            .eraseToAnyPublisher()
+    func fetchDetail(id: Int) async throws -> PokemonDetail {
+        async let detail = httpClient.fetch(
+            PokemonService.detail(id: id),
+            responseType: PokemonDetailResponse.self
+        )
+        async let species = httpClient.fetch(
+            PokemonService.species(id: id),
+            responseType: PokemonSpeciesResponse.self
+        )
+        return PokemonDetail(detail: try await detail, species: try await species)
     }
 }

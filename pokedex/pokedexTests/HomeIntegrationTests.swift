@@ -8,6 +8,7 @@ import Combine
 @testable import pokedex
 import XCTest
 
+@MainActor
 final class HomeIntegrationTests: XCTestCase {
     func test_loadView_doesNotUpdateTableViewOnViewModelError() {
         let (sut, _) = makeSUT(initialResult: Fail<[Pokemon], APIError>(error: APIError.serviceError).eraseToAnyPublisher())
@@ -22,6 +23,7 @@ final class HomeIntegrationTests: XCTestCase {
         let (sut, _) = makeSUT(initialResult: Just(list).setFailureType(to: APIError.self).eraseToAnyPublisher())
 
         sut.loadViewIfNeeded()
+        RunLoop.main.run(until: Date(timeIntervalSinceNow: 0.1))
 
         XCTAssertEqual(sut.tableView(sut.tableView, numberOfRowsInSection: 0), list.count)
         XCTAssertNil(sut.view.subviews.first(where: { $0 is Spinner }))

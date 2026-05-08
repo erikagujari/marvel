@@ -22,7 +22,7 @@ final class HomeViewModel {
     private let limitRequest: Int
     private let imageLoader: ImageLoaderUseCase
     private var cancellables = Set<AnyCancellable>()
-    private var cancellableImages = [AnyCancellable]()
+    private var cancellableImages = [Int: AnyCancellable]()
     var characters = CurrentValueSubject<[Pokemon], Never>([Pokemon]())
     var title = CurrentValueSubject<String, Never>("Pokédex")
     var showError = PassthroughSubject<(String, String), Never>()
@@ -34,19 +34,20 @@ final class HomeViewModel {
         self.imageLoader = imageLoader
     }
 
-    private func assignImageFrom(path: String, to imageAction: @escaping (UIImage) -> Void) {
-        imageLoader.fetch(from: path)
+    private func assignImageFrom(path: String, id: Int, to imageAction: @escaping (UIImage) -> Void) {
+        cancellableImages[id]?.cancel()
+        cancellableImages[id] = imageLoader.fetch(from: path)
             .receive(on: RunLoop.main)
-            .sink { result in
+            .sink { [weak self] result in
                 if case .failure = result,
                    let image = UIImage(named: "wifi") {
                     imageAction(image)
                 }
+                self?.cancellableImages[id] = nil
             }
             receiveValue: { image in
                 imageAction(image)
             }
-            .store(in: &cancellableImages)
     }
 
     private func loadCharacters(offset: Int) {
@@ -78,9 +79,10 @@ extension HomeViewModel: HomeViewModelProtocol {
             return HomeCellModel(title: model.name, description: nil, cancelAction: nil)
         }
 
-        assignImageFrom(path: path, to: imageAction)
+        assignImageFrom(path: path, id: model.id, to: imageAction)
         return HomeCellModel(title: model.name, description: nil, cancelAction: { [weak self] in
-            self?.cancellableImages[index].cancel()
+            self?.cancellableImages[model.id]?.cancel()
+            self?.cancellableImages[model.id] = nil
         })
     }
 

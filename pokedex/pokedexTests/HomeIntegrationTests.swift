@@ -1,0 +1,101 @@
+//
+//  HomeIntegrationTests.swift
+//  pokedexTests
+//
+//  Created by Erik Agujari on 26/10/21.
+//
+import Combine
+@testable import pokedex
+import XCTest
+
+final class HomeIntegrationTests: XCTestCase {
+    func test_loadView_doesNotUpdateTableViewOnViewModelError() {
+        let (sut, _) = makeSUT(initialResult: Fail<[Pokemon], APIError>(error: APIError.serviceError).eraseToAnyPublisher())
+
+        sut.loadViewIfNeeded()
+
+        XCTAssertEqual(sut.tableView(sut.tableView, numberOfRowsInSection: 0), 0)
+    }
+
+    func test_loadView_updatesTableViewOnViewModelSuccess_andDoesNotShowSpinner() {
+        let list = anyPokemonList()
+        let (sut, _) = makeSUT(initialResult: Just(list).setFailureType(to: APIError.self).eraseToAnyPublisher())
+
+        sut.loadViewIfNeeded()
+
+        XCTAssertEqual(sut.tableView(sut.tableView, numberOfRowsInSection: 0), list.count)
+        XCTAssertNil(sut.view.subviews.first(where: { $0 is Spinner }))
+    }
+
+    func test_loadView_showsSpinnerOnDelay() {
+        let list = anyPokemonList()
+        let (sut, _) = makeSUT(initialResult: Just(list).setFailureType(to: APIError.self).eraseToAnyPublisher(), delay: 1)
+        let exp = expectation(description: "Waiting for showing spinner")
+        sut.loadViewIfNeeded()
+
+        DispatchQueue.main.async {
+            XCTAssertNotNil(sut.view.subviews.first(where: { $0 is Spinner }))
+            exp.fulfill()
+        }
+
+        wait(for: [exp], timeout: 1)
+    }
+
+    func test_loadView_showsErrorOnViewModelError() {
+        let (sut, router) = makeSUT(initialResult: Fail<[Pokemon], APIError>(error: APIError.serviceError).eraseToAnyPublisher())
+        let exp = expectation(description: "Waiting to show error")
+
+        router.showedErrorAction = {
+            exp.fulfill()
+        }
+        sut.loadViewIfNeeded()
+
+        wait(for: [exp], timeout: 1.0)
+    }
+
+    func test_selectRow_showsDetail() {
+        let list = anyPokemonList()
+        let (sut, router) = makeSUT(initialResult: Just(list).setFailureType(to: APIError.self).eraseToAnyPublisher())
+        let exp = expectation(description: "Waiting to show detail")
+
+        router.showedDetailAction = {
+            exp.fulfill()
+        }
+
+        sut.loadViewIfNeeded()
+        sut.tableView.delegate?.tableView?(sut.tableView, didSelectRowAt: IndexPath(row: 0, section: 0))
+
+        wait(for: [exp], timeout: 1.0)
+    }
+}
+
+private extension HomeIntegrationTests {
+    func makeSUT(initialResult: AnyPublisher<[Pokemon], APIError>, delay: Double? = nil) -> (HomeViewController, HomeRouterSpy) {
+        let fetchUseCase = FetchPokemonUseCaseStub(firstLoadResult: initialResult, delay: delay)
+        let viewModel = HomeViewModel(fetchPokemonUseCase: fetchUseCase,
+                                      limitRequest: 10,
+                                      imageLoader: ImageLoaderUseCaseStub(result: Just(UIImage()).setFailureType(to: APIError.self).eraseToAnyPublisher()))
+        let router = HomeRouterSpy()
+        let viewController = HomeViewController(viewModel: viewModel, router: router)
+        router.viewController = viewController
+        trackForMemoryLeaks(instance: viewModel)
+        trackForMemoryLeaks(instance: viewController)
+        trackForMemoryLeaks(instance: router)
+
+        return (viewController, router)
+    }
+
+    class HomeRouterSpy: HomeRouterProtocol {
+        weak var viewController: UIViewController?
+        var showedErrorAction: (() -> Void)?
+        var showedDetailAction: (() -> Void)?
+
+        func showError(title: String, message: String) {
+            showedErrorAction?()
+        }
+
+        func showDetail(id: Int) {
+            showedDetailAction?()
+        }
+    }
+}

@@ -1,0 +1,62 @@
+name: CI / main
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'pokedex/**'
+      - '.github/workflows/ci-main.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: ci-main
+  cancel-in-progress: false
+
+jobs:
+  build-test:
+    name: Build & test
+    runs-on: macos-14
+    timeout-minutes: 25
+    env:
+      PROJECT: pokedex/pokedex.xcodeproj
+      SCHEME: pokedex
+      DESTINATION: 'platform=iOS Simulator,name=iPhone 16'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Pin Xcode 16.2
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: '16.2'
+
+      - name: Cache DerivedData
+        uses: actions/cache@v4
+        with:
+          path: ~/Library/Developer/Xcode/DerivedData
+          key: derived-${{ runner.os }}-xcode16-${{ hashFiles('pokedex/pokedex.xcodeproj/project.pbxproj') }}
+          restore-keys: |
+            derived-${{ runner.os }}-xcode16-
+
+      - name: Install xcbeautify
+        run: brew install xcbeautify
+
+      - name: Build & test
+        run: |
+          set -o pipefail
+          xcodebuild \
+            -project "$PROJECT" \
+            -scheme "$SCHEME" \
+            -configuration Debug \
+            -destination "$DESTINATION" \
+            -resultBundlePath build/pokedex.xcresult \
+            -enableCodeCoverage YES \
+            test | xcbeautify --renderer github-actions
+
+      - name: Upload xcresult
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: xcresult-${{ github.sha }}
+          path: build/pokedex.xcresult
+          retention-days: 30

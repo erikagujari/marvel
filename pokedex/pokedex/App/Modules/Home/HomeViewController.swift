@@ -4,13 +4,12 @@
 //
 //  Created by Erik Agujari on 23/10/21.
 //
-import Combine
+
 import UIKit
 
 final class HomeViewController: UITableViewController {
     private let viewModel: HomeViewModelProtocol
     private let router: HomeRouterProtocol
-    private var cancellables = Set<AnyCancellable>()
 
     init(viewModel: HomeViewModelProtocol, router: HomeRouterProtocol) {
         self.viewModel = viewModel
@@ -25,38 +24,39 @@ final class HomeViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        setupBindings()
         setupTableView()
-        viewModel.fetchInitialCharacters()
+        bind()
+        Task { @MainActor [weak self] in
+            await self?.viewModel.fetchInitialCharacters()
+        }
     }
 
-    private func setupBindings() {
-        viewModel.characters
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] _ in
-                self?.tableView.reloadData()
-        }.store(in: &cancellables)
-
-        viewModel.showSpinner
-            .receive(on: DispatchQueue.main)
-            .sink(receiveValue: { [weak self] show in
-                show ? self?.view.showSpinner() : self?.view.dismissSpinner()
-            })
-            .store(in: &cancellables)
-
-        viewModel.title
-            .receive(on: DispatchQueue.main)
-            .sink(receiveValue: { [weak self] title in
-                self?.title = title
-            })
-            .store(in: &cancellables)
-
-        viewModel.showError
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] (title, message) in
-                self?.router.showError(title: title, message: message)
+    @MainActor
+    private func bind() {
+        withObservationTracking {
+            _ = viewModel.characters
+            _ = viewModel.title
+            _ = viewModel.isLoading
+            _ = viewModel.errorAlert
+        } onChange: { [weak self] in
+            Task { @MainActor in
+                guard let self else { return }
+                self.render()
+                self.bind()
             }
-            .store(in: &cancellables)
+        }
+        render()
+    }
+
+    @MainActor
+    private func render() {
+        title = viewModel.title
+        tableView.reloadData()
+        viewModel.isLoading ? view.showSpinner() : view.dismissSpinner()
+        if let alert = viewModel.errorAlert {
+            router.showError(title: alert.title, message: alert.message)
+            viewModel.errorAlert = nil
+        }
     }
 
     private func setupTableView() {
@@ -66,15 +66,15 @@ final class HomeViewController: UITableViewController {
     }
 
     @objc private func refresh() {
-        viewModel.refresh()
         refreshControl?.endRefreshing()
+        Task { @MainActor [weak self] in await self?.viewModel.refresh() }
     }
 }
 
 // MARK: - UITableViewDataSource
 extension HomeViewController {
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return viewModel.characters.value.count
+        return viewModel.characters.count
     }
 
     override func numberOfSections(in tableView: UITableView) -> Int {
@@ -96,7 +96,7 @@ extension HomeViewController {
 // MARK: - UITableViewDelegate
 extension HomeViewController {
     override func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-        viewModel.willDisplayItemAt(indexPath.row)
+        Task { @MainActor [weak self] in await self?.viewModel.willDisplayItemAt(indexPath.row) }
     }
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {

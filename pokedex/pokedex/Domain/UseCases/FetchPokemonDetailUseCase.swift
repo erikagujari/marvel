@@ -4,10 +4,9 @@
 //
 //  Created by Erik Agujari on 28/10/21.
 //
-import Combine
 
-protocol FetchPokemonDetailUseCase {
-    func execute(id: Int) -> AnyPublisher<PokemonDetail, APIError>
+protocol FetchPokemonDetailUseCase: Sendable {
+    func execute(id: Int) async throws -> PokemonDetail
 }
 
 struct FetchPokemonDetailUseCaseProvider: FetchPokemonDetailUseCase {
@@ -17,7 +16,7 @@ struct FetchPokemonDetailUseCaseProvider: FetchPokemonDetailUseCase {
         self.repository = repository
     }
 
-    func execute(id: Int) -> AnyPublisher<PokemonDetail, APIError> {
-        return repository.fetchDetail(id: id)
+    func execute(id: Int) async throws -> PokemonDetail {
+        try await repository.fetchDetail(id: id)
     }
 }

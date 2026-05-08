@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct PokemonDetail {
+struct PokemonDetail: Equatable, Sendable {
     let id: Int
     let name: String
     let imageURL: String?

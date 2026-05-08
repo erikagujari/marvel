@@ -4,11 +4,10 @@
 //
 //  Created by Erik Agujari on 24/10/21.
 //
-import Combine
 import Foundation
 
-protocol FetchPokemonUseCase {
-    func execute(limit: Int, offset: Int) -> AnyPublisher<[Pokemon], APIError>
+protocol FetchPokemonUseCase: Sendable {
+    func execute(limit: Int, offset: Int) async throws -> [Pokemon]
 }
 
 struct FetchPokemonUseCaseProvider: FetchPokemonUseCase {
@@ -18,14 +17,9 @@ struct FetchPokemonUseCaseProvider: FetchPokemonUseCase {
         self.repository = repository
     }
 
-    func execute(limit: Int, offset: Int) -> AnyPublisher<[Pokemon], APIError> {
-        return repository.fetch(offset: offset, limit: limit)
-            .flatMap { pokemon -> AnyPublisher<[Pokemon], APIError> in
-                guard !pokemon.isEmpty else {
-                    return Fail(error: APIError.serviceError).eraseToAnyPublisher()
-                }
-                return Just(pokemon).setFailureType(to: APIError.self).eraseToAnyPublisher()
-            }
-            .eraseToAnyPublisher()
+    func execute(limit: Int, offset: Int) async throws -> [Pokemon] {
+        let pokemon = try await repository.fetch(offset: offset, limit: limit)
+        guard !pokemon.isEmpty else { throw APIError.serviceError }
+        return pokemon
     }
 }

@@ -4,52 +4,46 @@
 //
 //  Created by Erik Agujari on 24/10/21.
 //
-import Combine
 @testable import pokedex
 import XCTest
 
 final class FetchPokemonUseCaseTests: XCTestCase {
-    func test_executeFails_onRepositoryError() {
-        let error = APIError.serviceError
-        let sut = makeSUT(result: Fail<[Pokemon], APIError>(error: error).eraseToAnyPublisher())
+    func test_executeFails_onRepositoryError() async {
+        let expected = APIError.serviceError
+        let sut = makeSUT(result: .failure(expected))
 
-        expect(sut: sut, endsWithResult: .failure(error))
+        await assertThrows(sut: sut, expected: expected)
     }
 
-    func test_executeFails_onRepositoryEmptyList() {
-        let sut = makeSUT(result: Just<[Pokemon]>([]).setFailureType(to: APIError.self).eraseToAnyPublisher())
+    func test_executeFails_onRepositoryEmptyList() async {
+        let sut = makeSUT(result: .success([]))
 
-        expect(sut: sut, endsWithResult: .failure(.serviceError))
+        await assertThrows(sut: sut, expected: .serviceError)
     }
 
-    func test_executeFinishes_onRepositoryNotEmptyList() {
+    func test_executeFinishes_onRepositoryNotEmptyList() async throws {
         let pokemon = anyPokemonList()
-        let sut = makeSUT(result: Just<[Pokemon]>(pokemon).setFailureType(to: APIError.self).eraseToAnyPublisher())
+        let sut = makeSUT(result: .success(pokemon))
 
-        expect(sut: sut, endsWithResult: .finished)
+        let result = try await sut.execute(limit: 0, offset: 0)
+        XCTAssertEqual(result, pokemon)
     }
 }
 
 private extension FetchPokemonUseCaseTests {
-    func makeSUT(result: AnyPublisher<[Pokemon], APIError>) -> FetchPokemonUseCase {
-        let repository = PokemonRepositoryStub(listResult: result,
-                                               detailResult: Fail(error: APIError.serviceError).eraseToAnyPublisher())
+    func makeSUT(result: Result<[Pokemon], APIError>) -> FetchPokemonUseCase {
+        let repository = PokemonRepositoryStub(listResult: result, detailResult: .failure(.serviceError))
         return FetchPokemonUseCaseProvider(repository: repository)
     }
 
-    func expect(sut: FetchPokemonUseCase, endsWithResult expectedResult: Subscribers.Completion<APIError>, file: StaticString = #filePath, line: UInt = #line) {
-        let exp = expectation(description: "Waiting to complete execute")
-        var cancellables = Set<AnyCancellable>()
-
-        sut.execute(limit: 0, offset: 0)
-            .sink { receivedResult in
-                XCTAssertEqual(expectedResult, receivedResult, file: file, line: line)
-                exp.fulfill()
-            } receiveValue: { pokemon in
-                XCTAssertFalse(pokemon.isEmpty, file: file, line: line)
-            }
-            .store(in: &cancellables)
-
-        wait(for: [exp], timeout: 0.1)
+    func assertThrows(sut: FetchPokemonUseCase, expected: APIError, file: StaticString = #filePath, line: UInt = #line) async {
+        do {
+            _ = try await sut.execute(limit: 0, offset: 0)
+            XCTFail("Expected error but got success", file: file, line: line)
+        } catch let error as APIError {
+            XCTAssertEqual(error, expected, file: file, line: line)
+        } catch {
+            XCTFail("Expected APIError but got \(error)", file: file, line: line)
+        }
     }
 }

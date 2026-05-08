@@ -82,6 +82,24 @@ final class HomeViewModelTests: XCTestCase {
 
         XCTAssertNotEqual(itemsAfterInitialFetch, sut.characters)
     }
+
+    func test_concurrentFetchInitialCharacters_doesNotDoubleAppend() async {
+        let firstPage = anyPokemonList(ids: [0, 1])
+        let fetchUseCase = FetchPokemonUseCaseStub(
+            firstLoadResult: .success(firstPage),
+            delay: .milliseconds(50),
+            nextLoadResult: .success(anyPokemonList(ids: [2, 3, 4]))
+        )
+        let sut = HomeViewModel(fetchPokemonUseCase: fetchUseCase,
+                                limitRequest: 20,
+                                imageLoader: ImageLoaderUseCaseStub(result: .failure(.serviceError)))
+
+        async let first: Void = sut.fetchInitialCharacters()
+        async let second: Void = sut.refresh()
+        _ = await (first, second)
+
+        XCTAssertEqual(sut.characters, firstPage)
+    }
 }
 
 private extension HomeViewModelTests {

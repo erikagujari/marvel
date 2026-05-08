@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# SwiftLint pre-commit gate. Soft-fails if SwiftLint is missing.
+
+STAGED_SWIFT=$(git diff --cached --name-only --diff-filter=ACM | grep '\.swift$' || true)
+[ -z "$STAGED_SWIFT" ] && exit 0
+
+if ! command -v swiftlint >/dev/null 2>&1; then
+    echo "warning: SwiftLint not installed (brew install swiftlint); skipping pre-commit lint."
+    exit 0
+fi
+
+echo "$STAGED_SWIFT" | xargs swiftlint lint --quiet --config "$(git rev-parse --show-toplevel)/.swiftlint.yml"

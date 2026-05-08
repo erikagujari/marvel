@@ -1,13 +1,17 @@
 //
 //  BaseViewModel.swift
-//  marvel-heroes
+//  pokedex
 //
 //  Created by Erik Agujari on 30/10/21.
 //
-import Combine
+
+struct ErrorAlert: Equatable, Sendable {
+    let title: String
+    let message: String
+}
 
 @MainActor
-protocol BaseViewModel {
-    var showSpinner: PassthroughSubject<Bool, Never> { get }
-    var showError: PassthroughSubject<(String, String), Never> { get }
+protocol BaseViewModel: AnyObject {
+    var isLoading: Bool { get }
+    var errorAlert: ErrorAlert? { get set }
 }

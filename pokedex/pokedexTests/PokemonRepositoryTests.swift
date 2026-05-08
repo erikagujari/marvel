@@ -158,9 +158,9 @@ private extension PokemonRepositoryTests {
     }
 
     class URLProtocolStub: URLProtocol {
-        static var urlResponse: URLResponse?
-        static var data: Data?
-        static var error: Error?
+        nonisolated(unsafe) static var urlResponse: URLResponse?
+        nonisolated(unsafe) static var data: Data?
+        nonisolated(unsafe) static var error: Error?
 
         override class func canInit(with request: URLRequest) -> Bool {
             return true

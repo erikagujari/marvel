@@ -8,9 +8,6 @@
 import Foundation
 
 protocol ImageDataStore: Sendable {
-    typealias RetrievalResult = Result<Data?, Error>
-    typealias InsertionResult = Result<Void, Error>
-
-    func insert(_ data: Data, for path: String, completion: @escaping (InsertionResult) -> Void)
-    func retrieve(dataForPath path: String, completion: @escaping (RetrievalResult) -> Void)
+    func insert(_ data: Data, for path: String) async throws
+    func retrieve(dataForPath path: String) async throws -> Data?
 }

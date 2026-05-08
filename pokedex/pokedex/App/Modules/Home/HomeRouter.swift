@@ -6,12 +6,14 @@
 //
 import UIKit
 
+@MainActor
 protocol HomeRouterProtocol {
     var viewController: UIViewController? { get set }
     func showError(title: String, message: String)
     func showDetail(id: Int)
 }
 
+@MainActor
 final class HomeRouter: HomeRouterProtocol {
     weak var viewController: UIViewController?
 

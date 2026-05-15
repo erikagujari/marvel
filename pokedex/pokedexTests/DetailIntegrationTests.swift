@@ -5,68 +5,59 @@
 //  Created by Erik Agujari on 30/10/21.
 //
 @testable import pokedex
+import SwiftUI
 import XCTest
 
 @MainActor
 final class DetailIntegrationTests: XCTestCase {
-    func test_loadView_showsSpinnerOnImageView() async {
-        let (sut, _) = makeSUT(detailResult: .success(anyPokemonDetail()),
-                               imageResult: .success(UIImage()),
-                               imageDelay: .seconds(3))
-
-        sut.loadViewIfNeeded()
-
-        XCTAssertNotNil(sut.imageView.subviews.first(where: { $0 is Spinner }))
-    }
-
-    func test_loadView_dismissesSpinnerOnImageViewWhenCompleted() async {
-        let (sut, _) = makeSUT(detailResult: .success(anyPokemonDetail()),
-                               imageResult: .success(UIImage()))
-
-        sut.loadViewIfNeeded()
-        await waitFor { !sut.imageView.subviews.contains(where: { $0 is Spinner }) }
-
-        XCTAssertNil(sut.imageView.subviews.first(where: { $0 is Spinner }))
-    }
-
-    func test_loadView_updatesUIOnUseCaseCompletion() async {
+    func test_loadView_updatesViewModelOnUseCaseSuccess() async {
         let detail = anyPokemonDetail()
-        let (sut, _) = makeSUT(detailResult: .success(detail),
-                               imageResult: .success(UIImage()))
+        let setup = makeSUT(detailResult: .success(detail))
+        _ = setup.window
 
-        sut.loadViewIfNeeded()
-        await waitFor { sut.titleLabel.text == detail.name }
+        await waitFor { setup.viewModel.pokemon != nil }
 
-        XCTAssertEqual(sut.titleLabel.text, detail.name)
-        XCTAssertEqual(sut.descriptionLabel.text, detail.description)
+        XCTAssertEqual(setup.viewModel.pokemon, detail)
     }
 
-    func test_loadView_showsErrorOnUseCaseError() async {
-        let (viewController, router) = makeSUT(detailResult: .failure(.serviceError),
-                                               imageResult: .success(UIImage()))
+    func test_loadView_setsErrorAlertOnUseCaseError() async {
+        let setup = makeSUT(detailResult: .failure(.serviceError))
+        _ = setup.window
 
-        viewController.loadViewIfNeeded()
-        await waitFor { router.isDismissing }
+        await waitFor { setup.viewModel.errorAlert != nil }
 
-        XCTAssertTrue(router.isDismissing)
+        XCTAssertNotNil(setup.viewModel.errorAlert)
+    }
+
+    func test_loadView_settlesIsLoadingAfterFetch() async {
+        let setup = makeSUT(detailResult: .success(anyPokemonDetail()))
+        _ = setup.window
+
+        await waitFor { setup.viewModel.pokemon != nil }
+
+        XCTAssertFalse(setup.viewModel.isLoading)
     }
 }
 
 private extension DetailIntegrationTests {
-    func makeSUT(detailResult: Result<PokemonDetail, APIError>,
-                 imageResult: Result<UIImage, APIError>,
-                 imageDelay: Duration? = nil) -> (DetailViewController, DetailRouterStub) {
-        let router = DetailRouterStub()
-        let useCase = FetchPokemonDetailUseCaseStub(result: detailResult)
-        let imageLoader = ImageLoaderUseCaseStub(result: imageResult, delay: imageDelay)
-        let viewModel = DetailViewModel(id: 0, fetchUseCase: useCase, imageLoader: imageLoader)
-        let viewController = DetailViewController(viewModel: viewModel, router: router)
-        router.viewController = viewController
-        trackForMemoryLeaks(instance: viewController)
-        trackForMemoryLeaks(instance: viewModel)
-        trackForMemoryLeaks(instance: router)
+    struct Setup {
+        let window: UIWindow
+        let viewModel: DetailViewModel
+        let coordinator: AppCoordinator
+    }
 
-        return (viewController, router)
+    func makeSUT(detailResult: Result<PokemonDetail, APIError>) -> Setup {
+        let useCase = FetchPokemonDetailUseCaseStub(result: detailResult)
+        let viewModel = DetailViewModel(id: 0, fetchUseCase: useCase)
+        let imageLoader = ImageLoaderUseCaseStub(result: .success(UIImage()))
+        let coordinator = AppCoordinator()
+        let view = DetailView(viewModel: viewModel, coordinator: coordinator, imageLoader: imageLoader)
+        let host = UIHostingController(rootView: view)
+        trackForMemoryLeaks(instance: viewModel)
+        trackForMemoryLeaks(instance: coordinator)
+        trackForMemoryLeaks(instance: host)
+
+        return Setup(window: mountInWindow(host), viewModel: viewModel, coordinator: coordinator)
     }
 
     struct FetchPokemonDetailUseCaseStub: FetchPokemonDetailUseCase {
@@ -74,17 +65,6 @@ private extension DetailIntegrationTests {
 
         func execute(id: Int) async throws -> PokemonDetail {
             try result.get()
-        }
-    }
-
-    @MainActor
-    final class DetailRouterStub: DetailRouterProtocol {
-        weak var viewController: UIViewController?
-
-        var isDismissing = false
-
-        func showError(title: String, message: String) {
-            isDismissing = true
         }
     }
 }

@@ -22,6 +22,7 @@ struct CachedAsyncImage: View {
             }
         }
         .task(id: path) {
+            image = nil
             guard let path else { return }
             do {
                 image = try await loader.fetch(from: path)

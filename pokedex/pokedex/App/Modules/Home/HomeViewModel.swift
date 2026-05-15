@@ -36,7 +36,7 @@ final class HomeViewModel: HomeViewModelProtocol {
     }
 
     func refresh() async {
-        await loadCharacters(offset: characters.count)
+        await loadCharacters(offset: 0, reset: true)
     }
 
     func willDisplayItemAt(_ index: Int) async {
@@ -46,13 +46,13 @@ final class HomeViewModel: HomeViewModelProtocol {
         await loadCharacters(offset: characters.count)
     }
 
-    private func loadCharacters(offset: Int) async {
+    private func loadCharacters(offset: Int, reset: Bool = false) async {
         guard !isLoading else { return }
         isLoading = true
         defer { isLoading = false }
         do {
             let new = try await fetchPokemonUseCase.execute(limit: limitRequest, offset: offset)
-            characters += new
+            characters = reset ? new : characters + new
         } catch let error as APIError {
             errorAlert = ErrorAlert(title: Constants.errorTitle, message: error.description)
         } catch {

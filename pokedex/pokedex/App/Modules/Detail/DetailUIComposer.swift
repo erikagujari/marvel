@@ -4,31 +4,21 @@
 //
 //  Created by Erik Agujari on 28/10/21.
 //
-import CoreData
-import UIKit
+import SwiftUI
 
 @MainActor
 final class DetailUIComposer {
     private init() {}
 
-    static func compose(id: Int) -> UIViewController {
-        let router = DetailRouter()
-        let client = URLSessionHTTPClient(session: .shared)
-        let repository = PokemonRepositoryProvider(httpClient: client)
+    static func compose(
+        id: Int,
+        coordinator: AppCoordinator,
+        httpClient: any HTTPClient,
+        imageLoader: any ImageLoaderUseCase
+    ) -> some View {
+        let repository = PokemonRepositoryProvider(httpClient: httpClient)
         let useCase = FetchPokemonDetailUseCaseProvider(repository: repository)
-        let storeURL = NSPersistentContainer.defaultDirectoryURL()
-            .appendingPathComponent("feed-store.sqlite")
-        let cache: CoreDataFeedStore
-        do {
-            cache = try CoreDataFeedStore(localURL: storeURL)
-        } catch {
-            fatalError("Failed to initialize CoreDataFeedStore: \(error)")
-        }
-        let imageLoader = ImageLoaderProvider(client: client, cache: cache)
-        let viewModel = DetailViewModel(id: id, fetchUseCase: useCase, imageLoader: imageLoader)
-        let viewController = DetailViewController(viewModel: viewModel, router: router)
-        router.viewController = viewController
-
-        return viewController
+        let viewModel = DetailViewModel(id: id, fetchUseCase: useCase)
+        return DetailView(viewModel: viewModel, coordinator: coordinator, imageLoader: imageLoader)
     }
 }

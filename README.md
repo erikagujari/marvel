@@ -3,24 +3,24 @@
 
 ## Architecture Details:
 * Folder's distribution is: App(UI), Domain(UseCases), Data(Repositories and Network layer)
-* UI design pattern used is MVVM+Router for a basic communication between ViewController (UIKit based), ViewModel and a Router.
-* Usage of Combine framework to handle network requests and bindings to accomplish MVVM design pattern.
+* UI design pattern is SwiftUI + MVVM with `@Observable` `@MainActor` view models and a single `AppCoordinator` driving `NavigationStack`. `UIComposer` factories return `some View` and wire dependencies.
+* Async/await + `@Observable` replace Combine for both network requests and view-state bindings; `@MainActor` covers UI thread safety.
 * PokéAPI is HTTPS-only and requires no auth, so the app needs no API keys and no `NSAppTransportSecurity` exceptions.
 * There is a basic CoreData usage for cached image retrieval. Once fetching an image from a url path it is cached for future retrievals.
 
 ## UI Details:
-* **Home** contains a UITableView which displays cells containing each Pokémon received from Network. There is no Cache System for failure case at the moment, later on a CoreData cache based will be implemented.
-* Once getting to the last item displayed on the table, more items are fetched and later on displayed.
-* Cells displayed on home contain an image and a title. Once clicking into one of them a detail is shown.
+* **Home** contains a SwiftUI `List` which displays rows containing each Pokémon received from Network. There is no Cache System for failure case at the moment, later on a CoreData cache based will be implemented.
+* Once getting to the last item displayed on the list, more items are fetched and later on displayed.
+* Rows displayed on home contain an image and a title. Once tapping into one of them a detail is shown.
 
-* **Detail** contains an image, a title, a description and a list of types for the Pokémon selected. The detail screen issues two parallel PokéAPI requests (`/pokemon/{id}` for name/sprite/types and `/pokemon-species/{id}` for English flavor text) and zips them into a single domain model.
+* **Detail** contains an image, a title, a description and a list of types for the Pokémon selected. The detail screen issues two parallel PokéAPI requests (`/pokemon/{id}` for name/sprite/types and `/pokemon-species/{id}` for English flavor text) and zips them with `async let` into a single domain model.
 
 
 ## Testing:
 There is the existence of the unit tests and integration tests, the latter in favor of slower UI tests.
 
-* Unit tests coverage is on view controllers, view models, use cases, repositories and network layer.
-* Integration tests flow covers view controller interaction through view model, and a mock response from use cases.
+* Unit tests coverage is on view models, use cases, repositories and network layer.
+* Integration tests host the SwiftUI view in a `UIHostingController`, mount it in a key `UIWindow` (so `.task`/`onAppear` fire), and assert against the `@Observable` view model state with a stubbed use case.
 
 
 ## Stack:

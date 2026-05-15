@@ -5,95 +5,63 @@
 //  Created by Erik Agujari on 26/10/21.
 //
 @testable import pokedex
+import SwiftUI
 import XCTest
 
 @MainActor
 final class HomeIntegrationTests: XCTestCase {
-    func test_loadView_doesNotUpdateTableViewOnViewModelError() async {
-        let (sut, _) = makeSUT(initialResult: .failure(.serviceError))
+    func test_loadView_doesNotLoadCharactersOnViewModelError() async {
+        let (window, viewModel) = makeSUT(initialResult: .failure(.serviceError))
+        _ = window
 
-        sut.loadViewIfNeeded()
-        await waitFor { sut.tableView(sut.tableView, numberOfRowsInSection: 0) > 0 || !self.isStillLoading(sut) }
+        await waitFor { viewModel.errorAlert != nil || (!viewModel.isLoading && !viewModel.characters.isEmpty) }
 
-        XCTAssertEqual(sut.tableView(sut.tableView, numberOfRowsInSection: 0), 0)
+        XCTAssertEqual(viewModel.characters.count, 0)
     }
 
-    func test_loadView_updatesTableViewOnViewModelSuccess_andDoesNotShowSpinner() async {
+    func test_loadView_loadsCharactersOnViewModelSuccess() async {
         let list = anyPokemonList()
-        let (sut, _) = makeSUT(initialResult: .success(list))
+        let (window, viewModel) = makeSUT(initialResult: .success(list))
+        _ = window
 
-        sut.loadViewIfNeeded()
-        await waitFor { sut.tableView(sut.tableView, numberOfRowsInSection: 0) == list.count }
+        await waitFor { viewModel.characters.count == list.count }
 
-        XCTAssertEqual(sut.tableView(sut.tableView, numberOfRowsInSection: 0), list.count)
-        XCTAssertNil(sut.view.subviews.first(where: { $0 is Spinner }))
+        XCTAssertEqual(viewModel.characters.count, list.count)
+        XCTAssertFalse(viewModel.isLoading)
     }
 
-    func test_loadView_showsSpinnerOnDelay() async {
+    func test_loadView_setsIsLoadingDuringDelay() async {
         let list = anyPokemonList()
-        let (sut, _) = makeSUT(initialResult: .success(list), delay: .milliseconds(100))
-        sut.loadViewIfNeeded()
-        await waitFor { sut.view.subviews.contains(where: { $0 is Spinner }) }
-        XCTAssertNotNil(sut.view.subviews.first(where: { $0 is Spinner }))
+        let (window, viewModel) = makeSUT(initialResult: .success(list), delay: .milliseconds(100))
+        _ = window
 
-        // Wait for the in-flight load to settle so the in-flight call frame releases the VM
-        // before tearDown's leak check runs.
-        await waitFor(timeout: .seconds(2)) { sut.tableView(sut.tableView, numberOfRowsInSection: 0) == list.count }
+        await waitFor { viewModel.isLoading }
+        XCTAssertTrue(viewModel.isLoading)
+
+        await waitFor(timeout: .seconds(2)) { viewModel.characters.count == list.count }
     }
 
-    func test_loadView_showsErrorOnViewModelError() async {
-        let (sut, router) = makeSUT(initialResult: .failure(.serviceError))
+    func test_loadView_setsErrorAlertOnViewModelError() async {
+        let (window, viewModel) = makeSUT(initialResult: .failure(.serviceError))
+        _ = window
 
-        sut.loadViewIfNeeded()
-        await waitFor { router.didShowError }
+        await waitFor { viewModel.errorAlert != nil }
 
-        XCTAssertTrue(router.didShowError)
-    }
-
-    func test_selectRow_showsDetail() async {
-        let list = anyPokemonList()
-        let (sut, router) = makeSUT(initialResult: .success(list))
-
-        sut.loadViewIfNeeded()
-        await waitFor { sut.tableView(sut.tableView, numberOfRowsInSection: 0) == list.count }
-        sut.tableView.delegate?.tableView?(sut.tableView, didSelectRowAt: IndexPath(row: 0, section: 0))
-
-        XCTAssertTrue(router.didShowDetail)
+        XCTAssertNotNil(viewModel.errorAlert)
     }
 }
 
 private extension HomeIntegrationTests {
-    func makeSUT(initialResult: Result<[Pokemon], APIError>, delay: Duration? = nil) -> (HomeViewController, HomeRouterSpy) {
+    func makeSUT(initialResult: Result<[Pokemon], APIError>,
+                 delay: Duration? = nil) -> (UIWindow, HomeViewModel) {
         let fetchUseCase = FetchPokemonUseCaseStub(firstLoadResult: initialResult, delay: delay)
-        let viewModel = HomeViewModel(fetchPokemonUseCase: fetchUseCase,
-                                      limitRequest: 10,
-                                      imageLoader: ImageLoaderUseCaseStub(result: .success(UIImage())))
-        let router = HomeRouterSpy()
-        let viewController = HomeViewController(viewModel: viewModel, router: router)
-        router.viewController = viewController
+        let viewModel = HomeViewModel(fetchPokemonUseCase: fetchUseCase, limitRequest: 10)
+        let imageLoader = ImageLoaderUseCaseStub(result: .success(UIImage()))
+        let view = HomeView(viewModel: viewModel, imageLoader: imageLoader)
+        let host = UIHostingController(rootView: view)
         trackForMemoryLeaks(instance: viewModel)
-        trackForMemoryLeaks(instance: viewController)
-        trackForMemoryLeaks(instance: router)
+        trackForMemoryLeaks(instance: host)
 
-        return (viewController, router)
-    }
-
-    func isStillLoading(_ sut: HomeViewController) -> Bool {
-        sut.view.subviews.contains(where: { $0 is Spinner })
-    }
-
-    @MainActor
-    final class HomeRouterSpy: HomeRouterProtocol {
-        weak var viewController: UIViewController?
-        var didShowError = false
-        var didShowDetail = false
-
-        func showError(title: String, message: String) {
-            didShowError = true
-        }
-
-        func showDetail(id: Int) {
-            didShowDetail = true
-        }
+        return (mountInWindow(host), viewModel)
     }
 }

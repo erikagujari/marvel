@@ -27,30 +27,8 @@ final class HomeViewModelTests: XCTestCase {
         XCTAssertNotEqual(initialValue, sut.characters)
     }
 
-    func test_cellModelCallsImageAction_onImageLoaderSuccess() async {
-        let image = UIImage(systemName: "star")!
-        let sut = makeSUT(fetchUseCaseResult: .success(anyPokemonList()),
-                          imageLoaderResult: .success(image))
-
-        await sut.fetchInitialCharacters()
-        let loadedImage = await captureImage(from: sut, at: 0)
-
-        XCTAssertEqual(loadedImage, image)
-    }
-
-    func test_cellModelCallsImageActionWithWifiImage_onImageLoaderFailure() async {
-        let sut = makeSUT(fetchUseCaseResult: .success(anyPokemonList()),
-                          imageLoaderResult: .failure(.serviceError))
-
-        await sut.fetchInitialCharacters()
-        let loadedImage = await captureImage(from: sut, at: 0)
-
-        XCTAssertEqual(loadedImage.pngData(), UIImage(named: "wifi")?.pngData())
-    }
-
     func test_willDisplayItemAtIndex_doesNotLoadMoreCharactersOnNotValidId() async {
-        let sut = makeSUT(fetchUseCaseResult: .success(anyPokemonList(ids: [0, 1])),
-                          imageLoaderResult: .failure(.serviceError))
+        let sut = makeSUT(fetchUseCaseResult: .success(anyPokemonList(ids: [0, 1])))
 
         await sut.fetchInitialCharacters()
         let itemsAfterInitialFetch = sut.characters
@@ -61,7 +39,6 @@ final class HomeViewModelTests: XCTestCase {
 
     func test_willDisplayItemAtIndex_doesNotLoadMoreCharactersOnValidId_whenNextLoadIsFailure() async {
         let sut = makeSUT(fetchUseCaseResult: .success(anyPokemonList(ids: [0, 1])),
-                          imageLoaderResult: .failure(.serviceError),
                           nextLoadResult: .failure(.serviceError))
 
         await sut.fetchInitialCharacters()
@@ -73,7 +50,6 @@ final class HomeViewModelTests: XCTestCase {
 
     func test_willDisplayItemAtIndex_loadsMoreCharatersOnValidId_whenNextLoadIsSuccess() async {
         let sut = makeSUT(fetchUseCaseResult: .success(anyPokemonList(ids: [0, 1])),
-                          imageLoaderResult: .failure(.serviceError),
                           nextLoadResult: .success(anyPokemonList(ids: [2, 3, 4])))
 
         await sut.fetchInitialCharacters()
@@ -83,6 +59,20 @@ final class HomeViewModelTests: XCTestCase {
         XCTAssertNotEqual(itemsAfterInitialFetch, sut.characters)
     }
 
+    func test_refresh_replacesCharactersWithReloadedFirstPage() async {
+        let firstPage = anyPokemonList(ids: [0, 1])
+        let refreshedPage = anyPokemonList(ids: [99])
+        let sut = makeSUT(fetchUseCaseResult: .success(firstPage),
+                          nextLoadResult: .success(refreshedPage))
+
+        await sut.fetchInitialCharacters()
+        XCTAssertEqual(sut.characters, firstPage)
+
+        await sut.refresh()
+
+        XCTAssertEqual(sut.characters, refreshedPage)
+    }
+
     func test_concurrentFetchInitialCharacters_doesNotDoubleAppend() async {
         let firstPage = anyPokemonList(ids: [0, 1])
         let fetchUseCase = FetchPokemonUseCaseStub(
@@ -90,9 +80,7 @@ final class HomeViewModelTests: XCTestCase {
             delay: .milliseconds(50),
             nextLoadResult: .success(anyPokemonList(ids: [2, 3, 4]))
         )
-        let sut = HomeViewModel(fetchPokemonUseCase: fetchUseCase,
-                                limitRequest: 20,
-                                imageLoader: ImageLoaderUseCaseStub(result: .failure(.serviceError)))
+        let sut = HomeViewModel(fetchPokemonUseCase: fetchUseCase, limitRequest: 20)
 
         async let first: Void = sut.fetchInitialCharacters()
         async let second: Void = sut.refresh()
@@ -104,17 +92,8 @@ final class HomeViewModelTests: XCTestCase {
 
 private extension HomeViewModelTests {
     func makeSUT(fetchUseCaseResult: Result<[Pokemon], APIError>,
-                 imageLoaderResult: Result<UIImage, APIError> = .success(UIImage()),
                  nextLoadResult: Result<[Pokemon], APIError> = .success(anyPokemonList(ids: [3, 4, 5]))) -> HomeViewModelProtocol {
         let fetchUseCase = FetchPokemonUseCaseStub(firstLoadResult: fetchUseCaseResult, nextLoadResult: nextLoadResult)
-        return HomeViewModel(fetchPokemonUseCase: fetchUseCase,
-                             limitRequest: 20,
-                             imageLoader: ImageLoaderUseCaseStub(result: imageLoaderResult))
-    }
-
-    func captureImage(from sut: HomeViewModelProtocol, at index: Int) async -> UIImage {
-        await withCheckedContinuation { (cont: CheckedContinuation<UIImage, Never>) in
-            _ = sut.cellModel(for: index) { cont.resume(returning: $0) }
-        }
+        return HomeViewModel(fetchPokemonUseCase: fetchUseCase, limitRequest: 20)
     }
 }

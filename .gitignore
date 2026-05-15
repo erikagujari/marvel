@@ -94,3 +94,6 @@ iOSInjectionProject/
 
 # macOS
 .DS_Store
+
+# Claude Code skill optimizer state
+.claude/skills/*/.optimizer/

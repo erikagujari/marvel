@@ -8,7 +8,7 @@ The Xcode project lives one level below the repo root, inside `pokedex/`:
 - App sources: `pokedex/pokedex/`
 - Tests: `pokedex/pokedexTests/`
 
-Vanilla Xcode project — no SPM `Package.swift`, no CocoaPods, no Carthage, no Makefile, no fastlane. Swift 5.0, iOS deployment target 17.0. Scheme and app target are both `pokedex`; the test target is `pokedexTests`.
+Vanilla Xcode project — no SPM `Package.swift`, no CocoaPods, no Carthage, no Makefile, no fastlane. Swift 6.0, iOS deployment target 17.0. Scheme and app target are both `pokedex`; the test target is `pokedexTests`.
 
 ## Build & test
 All `xcodebuild` invocations must reference the nested project path:
@@ -36,18 +36,22 @@ Backed by the public [PokéAPI](https://pokeapi.co/docs/v2). No auth, no API key
 - `GET /api/v2/pokemon/{id}` — sprite + types.
 - `GET /api/v2/pokemon-species/{id}` — `flavor_text_entries` (English entry → `description`).
 
-`PokemonRepositoryProvider.fetchDetail(id:)` zips the detail and species requests via `Publishers.Zip` and merges them into a single `PokemonDetail`.
+`PokemonRepositoryProvider.fetchDetail(id:)` zips the detail and species requests with `async let` and merges them into a single `PokemonDetail`.
 
 List-cell artwork is derived from the parsed id, no extra request: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/{id}.png` (see `Pokemon.artworkURL(for:)`).
 
 ## Architecture
-MVVM + Router with Combine. Folders under `pokedex/pokedex/` mirror the layers:
+SwiftUI + MVVM with `@Observable` view models and a single `AppCoordinator` driving `NavigationStack`. Folders under `pokedex/pokedex/` mirror the layers:
 
-- `App/` — UIKit presentation. `Modules/{Home,Detail,Base}` each contain ViewController + ViewModel + Router + UIComposer (constructor-based DI wiring).
-- `Domain/` — `UseCases/` (e.g. `FetchPokemonUseCase`, `FetchPokemonDetailUseCase`, `ImageLoaderUseCase`) and domain `Entitites/` (note repo's spelling).
-- `Data/` — `Network/` (`HTTPClient` protocol, generic Combine `AnyPublisher` fetch; `APIError`), `Services/` (enum-based `Service` protocol that builds `URLRequest`s with query params), `Repositories/` (e.g. `PokemonRepository` wires network + cache), `Entities/` (DTOs), `Cache/`.
+- `PokedexApp.swift` — `@main App` entry. Owns the `AppCoordinator` via `@State`, wraps the home in `NavigationStack(path: $coordinator.path)` and binds `.navigationDestination(for: Route.self)` to `DetailUIComposer.compose`.
+- `App/` — SwiftUI presentation.
+  - `AppCoordinator.swift` — `@Observable @MainActor` coordinator owning `var path: [Route]` and `showDetail(id:)` / `pop()`. Replaces the per-screen `Router` types.
+  - `Modules/{Home,Detail,Base}` — each module has a SwiftUI `View`, an `@Observable @MainActor` ViewModel + protocol, and a `UIComposer` static factory returning `some View`.
+  - `Views/CachedAsyncImage.swift` — wraps `ImageLoaderUseCase` so SwiftUI views read images through the CoreData-backed cache. **Do not use stock `AsyncImage` — it bypasses the cache.**
+- `Domain/` — `UseCases/` (e.g. `FetchPokemonUseCase`, `FetchPokemonDetailUseCase`, `ImageLoaderUseCase`, all `async throws` + `Sendable`) and domain `Entitites/` (note repo's spelling).
+- `Data/` — `Network/` (`HTTPClient` protocol, `async throws` based; `APIError`), `Services/` (enum-based `Service` protocol that builds `URLRequest`s with query params), `Repositories/` (e.g. `PokemonRepository` wires network + cache), `Entities/` (DTOs), `Cache/`.
 
-Reactive plumbing uses Combine (`CurrentValueSubject`, `PassthroughSubject`, `AnyPublisher`). When adding a feature, follow the existing module template: add a folder under `App/Modules/`, create matching use cases under `Domain/UseCases/`, and back them with a repository under `Data/Repositories/`.
+All ViewModels are `@Observable @MainActor`; views consume them via `@Bindable`. SwiftUI's automatic dependency tracking replaces the UIKit-era `withObservationTracking` re-registration. When adding a feature, follow the existing module template: add a folder under `App/Modules/`, expose an `@Observable @MainActor` VM + protocol, write a SwiftUI `View<VM>`, wire it in a `UIComposer.compose(...) -> some View`, and add a `Route` case to `AppCoordinator`.
 
 ## Image caching (CoreData)
 The image cache uses CoreData (migrated from `NSCache` in commits `d5473ca`, `04d498a`).
@@ -58,10 +62,10 @@ The image cache uses CoreData (migrated from `NSCache` in commits `d5473ca`, `04
 - Consumer: `ImageLoaderUseCase` caches image bytes by URL path on first fetch and serves subsequent retrievals from CoreData.
 
 ## Testing patterns
-Pure XCTest — no Quick/Nimble, no snapshot testing. Tests live in `pokedexTests/`:
+Pure XCTest — no Quick/Nimble, no snapshot testing, no ViewInspector. Tests live in `pokedexTests/`:
 
 - **Unit**: `HomeViewModelTests`, `FetchPokemonUseCaseTests`, `FetchPokemonDetailUseCaseTests`, `PokemonRepositoryTests` (+ `+JSONMock` extension), `ImageLoaderUseCaseTests`.
-- **Integration** (preferred over UI tests per README): `HomeIntegrationTests`, `DetailIntegrationTests` — drive a real `UIViewController` + `ViewModel` against a stubbed use case.
-- **Helpers**: `Helpers.swift` (shared fixtures: `anyPokemonList`, `anyPokemonDetail`, stubs), `XCTestCase+MemoryLeakTracking.swift` — call `trackForMemoryLeaks(_:file:line:)` on each SUT/collaborator at the end of factory methods so leaked references fail the test in `tearDown`.
+- **Integration** (preferred over UI tests per README): `HomeIntegrationTests`, `DetailIntegrationTests` — host the SwiftUI view in a `UIHostingController`, mount it in a key `UIWindow` so SwiftUI's `.task` and `onAppear` fire, then assert against the `@Observable` ViewModel state. Use the `mountInWindow(_:)` helper, which registers its own teardown block to detach the controller cleanly.
+- **Helpers**: `Helpers.swift` (shared fixtures: `anyPokemonList`, `anyPokemonDetail`, `waitFor`, `mountInWindow`, stubs), `XCTestCase+MemoryLeakTracking.swift` — call `trackForMemoryLeaks(_:file:line:)` on each SUT/collaborator at the end of factory methods so leaked references fail the test in `tearDown`. Memory-leak tracking applies to the `UIHostingController`, the `@Observable` ViewModel, and the `AppCoordinator`.
 
-Stubs are typically closures returning `AnyPublisher<T, Error>` — match this style when adding new tests.
+Stubs are typically closures returning `Result<T, APIError>` exposed via `async throws` — match this style when adding new tests.

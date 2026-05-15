@@ -6,6 +6,7 @@
 //
 @testable import pokedex
 import UIKit
+import XCTest
 
 func anyPokemonList(ids: [Int] = [0]) -> [Pokemon] {
     return ids.map { id in
@@ -24,6 +25,30 @@ func waitFor(timeout: Duration = .seconds(1), _ predicate: @escaping @MainActor 
         await Task.yield()
         try? await Task.sleep(for: .milliseconds(10))
     }
+}
+
+extension XCTestCase {
+    /// Mounts a view controller in a key window so SwiftUI `.task` and
+    /// `onAppear` modifiers fire, and registers a teardown block that detaches
+    /// the controller from the window so it can deallocate cleanly.
+    @MainActor
+    func mountInWindow(_ controller: UIViewController) -> UIWindow {
+        let window = UIWindow(frame: UIScreen.main.bounds)
+        window.rootViewController = controller
+        window.makeKeyAndVisible()
+        controller.loadViewIfNeeded()
+        let boxedWindow = WeakWindow(window)
+        addTeardownBlock { @MainActor in
+            boxedWindow.window?.rootViewController = nil
+            boxedWindow.window?.isHidden = true
+        }
+        return window
+    }
+}
+
+private final class WeakWindow: @unchecked Sendable {
+    weak var window: UIWindow?
+    init(_ window: UIWindow) { self.window = window }
 }
 
 final class FetchPokemonUseCaseStub: FetchPokemonUseCase, @unchecked Sendable {

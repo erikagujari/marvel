@@ -39,8 +39,25 @@ extension XCTestCase {
         controller.loadViewIfNeeded()
         let boxedWindow = WeakWindow(window)
         addTeardownBlock { @MainActor in
-            boxedWindow.window?.rootViewController = nil
-            boxedWindow.window?.isHidden = true
+            // SwiftUI's `.alert` modifier presents a UIAlertController via
+            // UIKit, and that presentation retains the host's view tree past
+            // `rootViewController = nil`. Drain first so any pending alert is
+            // attached to the presentation chain, dismiss everything in it,
+            // then detach.
+            RunLoop.main.run(until: Date().addingTimeInterval(0.05))
+            if let window = boxedWindow.window {
+                var presented = window.rootViewController?.presentedViewController
+                while let current = presented {
+                    presented = current.presentedViewController
+                    current.dismiss(animated: false)
+                }
+                window.rootViewController = nil
+                window.isHidden = true
+            }
+            // Drain again so the trackForMemoryLeaks weak-ref checks
+            // (registered before this block, executed after it) see the
+            // post-release state instead of objects still pending deallocation.
+            RunLoop.main.run(until: Date().addingTimeInterval(0.1))
         }
         return window
     }

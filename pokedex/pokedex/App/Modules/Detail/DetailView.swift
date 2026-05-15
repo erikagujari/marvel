@@ -53,14 +53,16 @@ struct DetailView<VM: DetailViewModelProtocol>: View {
             isPresented: Binding(
                 get: { viewModel.errorAlert != nil },
                 set: { isPresented in
-                    if !isPresented {
-                        viewModel.errorAlert = nil
-                        coordinator.pop()
-                    }
+                    if !isPresented { viewModel.errorAlert = nil }
                 }
             ),
             actions: { Button("OK", role: .cancel) {} },
             message: { Text(viewModel.errorAlert?.message ?? "") }
         )
+        .onChange(of: viewModel.errorAlert) { oldValue, newValue in
+            if oldValue != nil && newValue == nil {
+                coordinator.pop()
+            }
+        }
     }
 }
